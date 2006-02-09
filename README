@@ -4,7 +4,7 @@
  K  Ca                                           Sc Ti V  Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr
  Rb Sr                                           Y  Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I  Xe
  Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W  Re Os Ir Pt Au Hg Ti Pb Bi Po At Rd
- Fr Ra Ac Th Pa U  Np Pu Am Cm Bk Cf Es Fm Md No Lr Uq Up Uh Us Uo Ue Un Ax Mr
+ Fr Ra Ac Th Pa U  Np Pu Am Cm Bk Cf Es Fm Md No Lr Uq Up Uh Us Uo Ue Un Ax Mr Du Da Tt
 
  Written fully in PHP, Elemental EX provides the simplest get-going framework for web app
  development. It takes the common tasks of application development, user management and UI and
