@@ -17,12 +17,11 @@ function EXMySQLSafe($str, $char="\\'\"") {
 	return $str;
 }
 
-function EXFold($myarray) {
-	global $EXFold_output, $EXFold_parentkey;
+function EXFold($myarray,$EXFold_output=null,$EXFold_parentkey=null) {
 	foreach($myarray as $key=>$value){
 		if (is_array($value)) {
 			$EXFold_parentkey .= $key.MLDF;
-			EXFold($value,$output,$parentkey);
+			EXFold($value,$EXFold_output,$EXFold_parentkey);
 			$EXFold_parentkey = "";
 		} else $EXFold_output .= $EXFold_parentkey.$key.MLDF.$value.MLDS;
 	} return $EXFold_output;

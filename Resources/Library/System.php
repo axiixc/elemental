@@ -2,7 +2,7 @@
 
 class Elemental {
 	
-	public $default_ui, $ui, $default_app, $app, $mode_dev;
+	public $default_ui, $ui, $default_app, $app, $mode_dev, $load_state;
 	
 	public function __construct() {
 		$this->default_ui = $this->confRead('default-ui');
@@ -13,7 +13,7 @@ class Elemental {
 	}
 	
 	public function confRead($key, $count=false) {
-		if ($data = Registery::fetch('DB')->query("SELECT * FROM `[prefix]conf` WHERE `key` = CONVERT(_utf8 '%s' USING latin1) COLLATE latin1_swedish_ci")) {
+		if ($data = fetch('DB')->query("SELECT * FROM `[prefix]conf` WHERE `key` = CONVERT(_utf8 '%s' USING latin1) COLLATE latin1_swedish_ci")) {
 			if($count) return mysql_num_rows($data);
 			else {
 				$output = mysql_fetch_assoc($data);
@@ -23,15 +23,15 @@ class Elemental {
 	}
 	
 	public function confWrite($key, $value) {
-		if($this->confRead($key, true)) return EXMySQLQuery("INSERT INTO `[database]`.`[prefix]conf` (`key`, `value`) VALUES ('%s', '%s');", $key, $value);
-		else return EXMySQLQuery("UPDATE `[database]`.`[prefix]conf` SET `value` = '%s' WHERE CONVERT( `[prefix]conf`.`key` USING utf8 ) = '%s';", $value, $key);
+		if($this->confRead($key, true)) return fetch('DB')->query("INSERT INTO `[database]`.`[prefix]conf` (`key`, `value`) VALUES ('%s', '%s');", $key, $value);
+		else return fetch('DB')->query("UPDATE `[database]`.`[prefix]conf` SET `value` = '%s' WHERE CONVERT( `[prefix]conf`.`key` USING utf8 ) = '%s';", $value, $key);
 	}
 	
 	public function confDelete($key) {
-		return EXMySQLQuery("DELETE FROM `[prefix]conf` WHERE CONVERT(`[prefix]conf`.`key` USING utf8) = '%s' LIMIT 1", $key);
+		return fetch('DB')->query("DELETE FROM `[prefix]conf` WHERE CONVERT(`[prefix]conf`.`key` USING utf8) = '%s' LIMIT 1", $key);
 	}
 	
-	public function die($error_id) {
+	public function end($error_id) {
 		$error_codes = EXFetchResourceResource('error_codes');
 		die(sprintf(Registry::fetch('UI')->template('error_code'), $error_code[$error_id], $error_id));
 	}

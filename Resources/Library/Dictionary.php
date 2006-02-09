@@ -30,7 +30,7 @@ define('destroy', time()-day);
 
 # System Extensions
 define('override', 'override', true);
-define('root',     $index_path, true);
+define('root',     $index_path.'/', true);
 define('rsc',      root.'Resources/', true);
 define('lib',      rsc.'Library/', true);
 define('nil',      rsc.'nil', true);

@@ -5,7 +5,7 @@ class UserInterface {
 	public $content, $content_override, $direct_echo, $interface_keys, $default_interface, $interface, $interface_override, $override; # content
 	public $title_template, $system_title, $title, $tagline, $footer, $description, $keywords, $favicon; # meta
 	public $javascript_head, $javascript_body, $javascript_include_head, $javascript_include_body, $javascript_onload; # javascript
-	private $errors, $notices; # notifications
+	private $errors=array(), $notices=array(); # notifications
 	private $sidebars, $sidebar_count; # sidebars
 	private $templates; # templates
 	
@@ -23,6 +23,21 @@ class UserInterface {
 			'Print'  => 'Print.php'
 		); $this->default_interface = '2Bar';
 		
+	}
+	
+	/* Content */
+	public function add($string) {
+		if(!Registry::fetch('EX')->load_state == override) $this->content .= $string;
+	}
+	
+	public function content() {
+		if(Registry::fetch('EX')->load_state == override) echo $this->content_override;
+		else echo $this->content;
+	}
+	
+	public function read() {
+		if(Registry::fetch('EX')->load_state == override) return $this->content_override;
+		else return $this->content;
 	}
 	
 	/* Meta */
@@ -85,7 +100,7 @@ class UserInterface {
 	/* Notifications */
 	public function notificationAdd($type, $message) {
 		if($type == UIError) {
-			$this->$errors[] = $message;
+			$this->errors[] = $message;
 			return true;
 		} elseif($type == UINotice) {
 			$this->notices[] = $messages;
@@ -121,10 +136,10 @@ class UserInterface {
 	
 	/* Menus */
 	public function menu($id, $class='UIMenu', $title=null, $array=false, $return=false) {
-		$t = mysql_fetch_assoc(EXMySQLQuery("SELECT * FROM `[prefix]menus` WHERE `name` LIKE CONVERT(_utf8 '$id' USING latin1) COLLATE latin1_swedish_ci"));
+		$t = mysql_fetch_assoc(fetch('DB')->query("SELECT * FROM `[prefix]menus` WHERE `name` LIKE CONVERT(_utf8 '$id' USING latin1) COLLATE latin1_swedish_ci"));
 		$menu = $t['id'];
 
-		$result = EXMySQLQuery("SELECT *  FROM `[prefix]navigation` WHERE `menu` = $menu ORDER BY `rank` ASC");
+		$result = fetch('DB')->query("SELECT *  FROM `[prefix]navigation` WHERE `menu` = $menu ORDER BY `rank` ASC");
 
 		if($array) while($nav = mysql_fetch_assoc($result)) { # Return an array
 			$output[$nav['id']]['link'] = $nav['link']; 
@@ -173,9 +188,10 @@ class UserInterface {
 }
 
 # For sanity's sake
-function add($str) { Registry::fetch('UI')->content .= $str; }
+function add($str) { Registry::fetch('UI')->add($str); }
 function add_js($str, $head=true) { Registry::fetch('UI')->javascriptAdd($str, $body); }
 function inc_js($str, $head=true) { Registry::fetch('UI')->javascriptInclude($str, $head); }
 function onload($str) { Registry::fetch('UI')->onload .= $str; }
 function add_error($message) { Registry::fetch('UI')->notificationAdd(UIError, $message); };
 function add_notice($message) { Registry::fetch('UI')->notificationAdd(UINotice, $message); }
+function title($title) { Registry::fetch('UI')->title = $title; }

@@ -7,24 +7,6 @@ function EXInString($pointer, $input, $case=false, $word=false) {
 	if(preg_match($match, $input)) return true; else return false;
 }
 
-function EXHTMLSafe($str) {
-	$str = str_replace('<','&lt;',$str);
-	$str = str_replace('>','&gt;',$str);
-	return str_replace('"','&quot;',$str);
-}
-
-function EXJSSafe($str) {
-	$str = str_replace("'","\\'",$str);
-	$str = str_replace("\n","\\n",$str);
-	return str_replace("\t","\\t",$str);
-}
-
-function EXMySQLSafe($str, $char="\\'\"") {
-	$chars = str_split($char);
-	foreach($chars as $i) $str = str_replace($i, "\\$i", $str);
-	return $str;
-}
-
 function filename($str) { $nfo = pathinfo($str); return $nfo['filename']; }
 
 function EXWordsSubStr($str_String, $int_Length) {

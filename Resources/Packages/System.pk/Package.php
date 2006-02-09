@@ -16,4 +16,5 @@ function EXRegisterResource($id, $contents) {
 		$resource = $contents;
 	} $write = sprintf($template, $id, $resource_type, $resource);
 	FSWrite(sprintf('%s/Resources/%s.php', dirname(__FILE__), $id), $write);
+	unset ($template, $resource_type, $resource, $id);
 }
