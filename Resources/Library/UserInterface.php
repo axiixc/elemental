@@ -147,7 +147,7 @@ class UserInterface {
 		} else { # Create HTML structure
 			$output = "<ul class=\"$class\">"; # the opening list tag
 			if(!is_null($title)) $output = $output."<h2>$title</h2>";
-			while($nav = mysql_fetch_assoc($result)) $output = $output."\t<li><a href=\"{$nav['link']}\">{$nav['name']}</a></li>\n";
+			while($nav = mysql_fetch_assoc($result)) $output .= sprintf("\t<li><a href=\"%s\">%s</a></li>\n", $nav['link'], $nav['name']);
 			$output = $output.'</ul>'; # closing list tag
 		} if($return) return $output; else echo $output;
 	}
