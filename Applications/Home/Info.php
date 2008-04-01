@@ -1,27 +1,10 @@
-<?php # Home [axiixc] : Application Info for display
+<?php # Home [axiixc] : Application Information
 
-# About the app
-$app = array(
+$application = array(
 	'name' => 'Home',
-	'version' => 0.3,
-	'description' => 'Demo App. Displays the README file.'
+	'bundle_id' => 'com.axiixc.elemental.home',
+	'dev_id' => '873443a2470b7ac677ebccdc6fa42c85',
+	'description' => 'Displays the README file or a preprogrammed message and uses superfulous code to illustrait some of the resources avaible to app developers.'
 );
 
-# About you
-$author = array(
-	'username' => 'axiixc',
-	'name' => 'James Savage',
-	'web' => 'http://axiixc.co.cc/',
-	'email' => 'axiixc@gmail.com',
-	'irc' => array('irc.freenode.net/axiixc', 'attila.osx86.hu/axiixc');
-	'aim' => false,
-	'yahoo' => false,
-	'skype' => false,
-	'google' => false
-)
-
-# If you have registered with the developer program
-$link = array(
-	'uuid' => '',
-	'devid' => ''
-);
+$author = fetch_sig('axiixc');

@@ -1,24 +1,44 @@
  H                                                                                            He
  Li Be              ELEMENTAL FRAMEWORK                                        B  C  N  O  F  Ne
- Na Mg                version H  0003                                          Al Si P  S  Cl Ar
+ Na Mg                version H  0004                                          Al Si P  S  Cl Ar
  K  Ca                                           Sc Ti V  Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr
  Rb Sr                                           Y  Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I  Xe
  Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W  Re Os Ir Pt Au Hg Ti Pb Bi Po At Rd
- Fr Ra Ac Th Pa U  Np Pu Am Cm Bk Cf Es Fm Md No Lr Uq Up Uh Us Uo Ue Un Ax Mr Du Da Tt
+ Fr Ra Ac Th Pa U  Np Pu Am Cm Bk Cf Es Fm Md No Lr Uq Up Uh Us Uo Ue Un Ax Mr Du Da Tt Ck
 
- Written fully in PHP, Elemental EX provides the simplest get-going framework for web app
- development. It takes the common tasks of application development, user management and UI and
- does them for you, while leaving you enormous flexibility. 
+ Written in PHP, Elemental is a mix between Objects and old school PHP functions. Elemental is
+ my take on a web development framework. It provides things that I find to be useful and helpful
+ but I really can't tell you if you are going to like it. It started out of my annoyance with
+ recreating bits of code for each project, so I decided to try to create a framework that would
+ allow me to forget about certain aspects and focus on my goals in a project.
 
- EX uses a bundle bases management system, where all code is bundled by its function. Executed
- code goes into application bundles and UI code goes into ui bundles. Everything is modular and
- easy to as drag and drop to install.
+ Elemental is that, it offers a fully managed UI and Application bundle management system,
+ super simple configuration and cache implementations and full UI template support. It relies 
+ heavily on dynamic scanning of files and arrays and somewhat on a strict naming convention,
+ but nearly everything can be tweaked to fit better with your style of code. A lot of work went
+ into the UI Bundle specs, which I am particularly proud of yet no where near done. I really see
+ the UI Management as one of the best features of Elemental, allowing you to do all your data
+ generation and pass it to a function, knowing that it will display correctly in any UI bundle.
 
- Besides offering a expansive UI library, EX also makes data storage super easy with the Managed
- Data Library, which interfaces with special database tables to automatically store, edit and
- retrieve your data. These can be used with no SQL knowledge, however full MySQL access is still
- available, and extended through the MySQL::query() method, which gives you special syntax such
- as [prefix] and [database], as well as printf string support.
+ As a side note: I've taken to calling the UI Bundles instead of Themes or Skins because they
+ are much more than either of those two things. They contain multiple interfaces, stylesheets,
+ images and template file (.t).
+
+ Application bundles also feature a set structure of Initialize.php which is loaded before any
+ execution code and can be used to preload resources or run user rights checking, display error
+ messages and halt further loading before any Application code is run. Resources.php should
+ contain a class named the same as your Application's folder, and is the quickest way for other
+ bundles or applications to access an App's data. Finally Application.php contains any execution
+ code. It is good to note if you have a Resources.php, it has already been included above your
+ Application.php. However any bundle containing at least Application.php will run fine. Info.php
+ is just a series of arrays read to generate extra display information in the back-end
+ management applications.
+
+ Basically all code is subject to change. I'm still working out the best way to do stuff. I
+ wanted to try to make it innovative, yet not a pain or overly complex. As such, I may pull a
+ Google and leave the BETA sticker on for an long period of time.
+
+ Put simply EVERYTHING HERE IS SUBJECT TO CHANGE!! Enjoy your stay.
 
  ==== Changelog ================================================================================
 
@@ -32,35 +52,30 @@
  H  0003 - Moved to OOP
          - Cleaned up libraries and system loader
 
- ==== Roadmap ==================================================================================
+ H  0004 - Functional build
+         - All major functionality is working and tested
+         - Templating and UI Management is done
+         - Code is cleaned up and better documented
+
+ ==== Roadmap ============== [-] Assured Change ===== [+] Proposed Change ======================
+
+ H  0005 - Fully document code
+         - Fully test all functions
+         - Fix .htaccess to not require folder to be called Elemental
+
+ H  0006 - Base Application Bundles finished and tested
+         + Write sample Application Bundles
+
+ H  0007 + 
  
- H  0004 - Working OOP code for all Libraries 
-
- H  0005 - Documentation released
-         - Managed Data Library finished
-
- H  0006 - All bundle specs done
-         - All method input and outputs set
-
- H  0007 - Default Application bundles and Prefpage bundles done
-
- H  0008 - Caching and Archive Support
-         - FTP or alternative large file upload system implemented and tested
-
- H  0009 - Stable for testing
-         - Automagical Library included (BETA)
-
- H  0010 - Final debug done and sent out for final test
-         - Release of the Automagical Library, it is now on by default
-
- He 0011 - Release v1.0 [He 0011]
+ He 000X - Public Release
 
  ==== Bugs and Patches =========================================================================
 
  Submit any bugs or patches you create to GitHub if possible for the project Elemental
  [http://github.com/axiixc/elemental/tree/master] or to axiixc[gmail]com
 
- ==== License ==================================================================================
+ ==== License ============== Subject to Change =================================================
 
  PHP web application development framework
  Copyright (C) 2009 James Savage axiixc[gmail]com
@@ -79,4 +94,4 @@
 
  This license applies to all files that came with this program. Names of specific authors of 
  individual scripts can be found at the top of each scrip next to the script's name in square 
- brackets ( eg [ axiixc : mrmonday ] )
+ brackets ( ex [axiixc:mrmonday:danopia] )

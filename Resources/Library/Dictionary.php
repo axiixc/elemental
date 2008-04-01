@@ -1,22 +1,22 @@
 <?php # Dictionary [ axiixc ] : System definitions
 
 # System Version
-define('EXSystemVersion', 0.3);
+define('EXSystemVersion', 0.4);
 
 # System Definitions
 define('UIError', 'UIError');
 define('UINotice', 'UINotice');
 define('UINotification', 'UINotification');
-define('UISidebarMain', 'UISidebarMain');
-define('UISidebarOther','UISidebarOther');
+define('UISidebarMain', 'UISidebarMain'); # Is this even used?
+define('UISidebarOther','UISidebarOther'); # '''
 define('override', 'override');
-define('nil', root.'Resources/nil');
+define('nil', root.'Resources/nil'); # Not null, this points to a file
 
 # Filesystem
-define('lc_filename', 'lc_filename');
-define('lc_basename', 'lc_basename');
-define('uc_filename', 'uc_filename');
-define('uc_basename', 'uc_basename');
+define('lc_filename', 'lc_filename'); # Lower Case Filename
+define('lc_basename', 'lc_basename'); # Lower Case Basename
+define('uc_filename', 'uc_filename'); # Upper Case Filename
+define('uc_basename', 'uc_basename'); # Upper Case Filename
 define('filename',    'filename');
 define('basename',    'basename');
 define('position',    'position');
@@ -40,7 +40,8 @@ define('destroy', time()-day);
 
 # Client Information
 define('client_ip', $_SERVER['REMOTE_ADDR']);
-define('server_ip', $_SERVER['SERVER_ADDR']);
+if($_SERVER['SERVER_ADDR'] = '::1') define('server_ip', '127.0.0.1');
+else define('server_ip', $_SERVER['SERVER_ADDR']);
 
 # User Authentication
 define('UATypeBanned', 'UATypeBanned');
@@ -48,9 +49,8 @@ define('UATypeGuest', 'UATypeGuest');
 define('UATypeBasic', 'UATypeBasic');
 define('UATypeAdmin', 'UATypeAdmin');
 
-# Multilayer Data Storage [for storing multidimensional arrays in strings]
-# These are not escaped, please don't try to fold arrays with the symbols
-# in them, they will fail to unfold correctly.... That may be a security
-# hole. MUST FIX MUST FIX MUST FIX MUST FIX MUST FIX MUST FIX MUST FIX!!
-define('MLDF', '[%@%]');
-define('MLDS', '[%#%]');
+# System Resources
+$system['applications'] = array('api', 'preferences', 'system', 'user');
+$system['package'] = array('developers', 'system');
+$system['ui'] = array('system');
+$system['preferences'] = array('api', 'system', 'user', 'site');

@@ -1,3 +1,3 @@
-<?php # Home [axiixc] : Application Initilization Code
+<?php # Home [axiixc] : Initilization Code
 
-/* I have nothing to do */
+/* Nothing to do here */

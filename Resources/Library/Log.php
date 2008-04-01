@@ -1,8 +1,9 @@
-<?php
+<?php # Global Log [axiixc]
 
 class Log {
 	
 	private static $log = array();
+	private static $output = false;
 	
 	private function __construct() {
 	}
@@ -11,18 +12,28 @@ class Log {
 		$args = func_get_args();
 		$string = array_shift($args);
 		if(count($args) > 0) $string = vsprintf($string, $args);
-		self::$log[] = time().'] '.$string;
+		self::$log[] = array('time' => time(), 'message' => $string);
 	}
 	
-	public static function read() {
+	public static function read($return=false, $array=false) {
+		$master = Registry::fetch("Interface")->template("Log");
+		$template = Registry::fetch("Interface")->template("Log Message");
 		if(count(self::$log) > 0) {
-			echo '<pre>';
-			foreach(self::$log as $id => $msg) {
-				printf("[%03s : %s\n", $id, $msg);
-			} echo '</pre>';
-		} else {
-			echo "<pre>000 ".time()." Log::read() No log entries.</pre>";
-		}
+			foreach(self::$log as $id => $message)
+				$log .= sprintf($template, $id, $message['time'], $message['message']);
+		} else $log = sprintf($template, '000', time(), 'Log::read() No log entries.');
+		$write = sprintf($master, $log);
+		
+		# Output Format
+		if($return) 
+			if($array) return self::$log;
+			else return $write;
+		else echo $write;
+	}
+	
+	public static function output($x=null) {
+		if(is_null($x)) return self::$output;
+		else self::$output = $x;
 	}
 	
 	public static function clear() {

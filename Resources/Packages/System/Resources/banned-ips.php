@@ -1,6 +1,6 @@
-<?php # banned-ips : System Resource
+<?php # Banned Ips : System Resource
 
 $resource_type = 'array';
-$resource = '0[%@%]123.456.789.123[%#%]';
+$resource = 'a:1:{i:0;s:15:"123.456.789.000";}';
 
 ?>

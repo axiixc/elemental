@@ -2,13 +2,13 @@
 
 function path_safe($path, $strict=false) {
 	if($strict) {
-		$path = preg_replace('/[.]{2,}/',null,$url);
-		$path = str_replace('/',null,$url);
-		return  str_replace('\\',null,$url);
+		$path = preg_replace('/[.]{2,}/',null,$path);
+		$path = str_replace('/',null,$path);
+		$path = str_replace('\\',null,$path);
 	} else {
-		$path = str_replace('/',null,$url);
-		return  str_replace('\\',null,$url);
-	}
+		$path = str_replace('/',null,$path);
+		$path = str_replace('\\',null,$path);
+	} return $path;
 }
 
 function mysql_safe($str, $char="\\'\"") {
@@ -17,25 +17,20 @@ function mysql_safe($str, $char="\\'\"") {
 	return $str;
 }
 
+function html_safe($str) {
+	$str = str_replace('<', '&lt;', $str);
+	return str_replace('>', '&gt;', $str);
+}
+
 function filename($str) { $nfo = pathinfo($str); return $nfo['filename']; }
 
-function fold($myarray,$EXFold_output=null,$EXFold_parentkey=null) {
-	foreach($myarray as $key=>$value){
-		if (is_array($value)) {
-			$EXFold_parentkey .= $key.MLDF;
-			EXFold($value,$EXFold_output,$EXFold_parentkey);
-			$EXFold_parentkey = "";
-		} else $EXFold_output .= $EXFold_parentkey.$key.MLDF.$value.MLDS;
-	} return $EXFold_output;
+/* For Compatibility */
+function fold($myarray) {
+	return serialize($myarray);
 }
 
 function unfold($string) {
-	$lines = explode(MLDS, $string);
-	foreach ($lines as $value){
-		$items = explode(MLDF, $value);
-		if (sizeof($items) == 2) $myarray[$items[0]] = $items[1];
-		else if (sizeof($items) == 3) $myarray[$items[0]][$items[1]] = $items[2];
-	} return $myarray;
+	return unserialize($string);
 }
 
 /* This String To -> this-string-to */
@@ -46,4 +41,28 @@ function crunch($string) {
 /* this-string-to -> This String To */
 function uncrunch($string) {
 	return ucwords(str_replace('-', ' ', $string));
+}
+
+function is_even($x) {
+	if($x&1) return false;
+	else return true;
+}
+
+function is_odd($x) {
+	if($x&1) return true;
+	else return false;
+}
+
+function diagnostic($output, $return=false) {
+	$colors = Conf::read("Diagnostic Styles");
+	foreach($output as $name => $value) {
+		if(is_null($value)) $value = 'NULL';
+		if($value === true) $value = 'TRUE';
+		if($value === false) $value = 'FALSE';
+		$value = str_replace('NULL', '<span style="color:yellow">NULL</span>', $value);
+		$value = str_replace('TRUE', '<span style="color:green">TRUE</span>', $value);
+		$value = str_replace('FALSE', '<span style="color:red">FALSE</span>', $value);
+		$x .= sprintf('<span style="color:#2C68C1;">[%s]</span>&nbsp;%s<br />', uncrunch($name), $value);
+	}
+	if($return) return $x; else { echo $x; return null; }
 }

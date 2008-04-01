@@ -1,6 +1,6 @@
-<?php # guest_template : System Resource
+<?php # Guest User : System Resource
 
 $resource_type = 'array';
-$resource = 'id[%@%]0[%#%]name[%@%]guest[%#%]display-name[%@%]Guest[%#%]first-name[%@%]Scottsdale[%#%]middle-name[%@%]Ann[%#%]last-name[%@%]Prebonic[%#%]email[%@%][%#%]';
+$resource = 'a:0:{}';
 
 ?>

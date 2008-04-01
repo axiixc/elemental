@@ -1,13 +1,18 @@
-<?php
+<?php # User Interface Management [axiixc]
+
+## OMG NO OVERRIDE SUPPORT WTF ADD IT YOU IDIOT
 
 class UserInterface {
 	
+	/* Variable Hell */
 	public $content;
 	public $content_override;
 	public $interface_keys = array();
 	public $ui;
+	public $path;
 	public $default_interface;
 	public $interface_override;
+	public $login_window_interface;
 	public $interface;
 	public $title_template;
 	public $system_title;
@@ -18,16 +23,29 @@ class UserInterface {
 	public $keywords;
 	public $favicon;
 	public $apple_icon;
+	public $override = false;
 	public $direct_echo = false;
-	private $javascript = array();
-	private $notifications = array();
-	private $sidebars = array();
+	public $sidebar_counter = 0;
+	public $javascript = array();
+	public $notifications = array();
+	public $sidebars = array();
 	
 	public function __construct($ui=null) {
+		# Check for UI Init type
 		if(is_null($ui)) $this->ui = Conf::read('UI');
 		else $this->ui = $ui;
+		# Check Validity
+		if(!file_exists(root."Resources/UI/{$this->ui}/")) {
+			$this->ui = 'System';
+			Log::write("Load UI: User defined UI bundle could not be found. Defaulting to System bundle.");
+		}
 		include root.'Resources/UI/'.$this->ui.'/Conf.php';
+		# TEMP FIX 
+		if($_GET['fix_urls'] == 'yes') $this->path = "http://axiixcdev.co.cc:8008/Elemental/Resources/UI/$this->ui/";
+		else $this->path = Conf::read("WWW Path").'Resources/UI/'.$this->ui.'/';
+		# END FIX
 		$this->default_interface = $this->interface = $this->interface_override = $Interface['default_interface'];
+		$this->login_window_interface = (isset($Interface['login_window'])) ? $Interface['login_window'] : '1Bar' ;
 		$this->interface_keys = array_merge(import("Interface Keys"), $Interface['interface_keys']);
 		$this->title_template = Conf::read("Head Title Format");
 		$this->system_title = Conf::read("Title");
@@ -37,8 +55,12 @@ class UserInterface {
 		$this->keywords = Conf::read("Keywords");
 		$this->favicon = Conf::read("Favicon");
 		$this->apple_icon = Conf::read("Apple Icon");
+		# Convert $_GET vars to notices/errors
+		if(isset($_GET['error'])) foreach(explode('[%@%]', $_GET['error']) as $msg) $this->notification(UIError, $msg);
+		if(isset($_GET['notice'])) foreach(explode('[%@%]', $_GET['notice']) as $msg) $this->notification(UINotice, $msg);
 	}
 	
+	/* Meta */
 	public function title($return=false) {
 		if(!is_null($this->title)) {
 			$output = str_replace('%a', $this->title, $this->head_template);
@@ -49,41 +71,51 @@ class UserInterface {
 	}
 	
 	public function favicon() {
-		if($this->favicon) $path = $this->favicon;
+		if($this->favicon) $favicon = $this->favicon;
 		else {
 			$path = "Resources/UI/{$this->ui}/Images/favicon.";
-			if(file_exists($path.".png")) $favicon = $path.".png";
-			elseif(file_exists($path.".ico")) $favicon = $path.".ico";
-			elseif(file_exists($path.".gif")) $favicon = $path.".gif";
+			if(file_exists($path.".png")) $favicon = $path."png";
+			elseif(file_exists($path.".ico")) $favicon = $path."ico";
+			elseif(file_exists($path.".gif")) $favicon = $path."gif";
 			else $favicon = null;
 		}
+		printf('<link rel="icon" href="%s" type="image/x-icon" />'."\n", $favicon);
+		printf('<link rel="shortcut icon" href="%s" type="image/x-icon" />'."\n", $favicon);
+	}
 	
-		printf('<link rel="icon" href="%s" type="image/x-icon" />', $favicon);
-		printf('<link rel="shortcut icon" href="%s" type="image/x-icon" />', $favicon);
+	public function appleicon() {
+		if($this->apple_icon) $icon = $this->apple_icon;
+		else {
+			$path = "Resources/UI/{$this->ui}/Images/appleicon.png";
+			if(file_exists($path)) $icon = $path;
+			else $icon = null;
+		} printf('<link rel="apple-touch-icon" href="%s" />'."\n", $favicon);
 	}
 	
 	public function css() {
-		$path = "Resources/UI/{$this->ui}/Style/";
+		$iPath = root."Resources/UI/{$this->ui}/Style/";
+		$path = $this->path."Style/";
 		
-		if(file_exists($path."Base.css")) printf('<link rel="stylesheet" type="text/css" href="%s" />', $base."Base.css");
-		elseif(file_exists($path."Base.php")) printf('<link rel="stylesheet" type="text/css" href="%s" />', $base."Base.php");
+		if(file_exists($iPath."Base.css")) printf('<link rel="stylesheet" type="text/css" href="%s" />'."\n", $path."Base.css");
+		elseif(file_exists($iPath."Base.php")) printf('<link rel="stylesheet" type="text/css" href="%s" />'."\n", $path."Base.php");
 		else Log::write("Interface::css() No Base.(css|php) found.");
 		
-		if(file_exists($path.$this->interface.".css")) printf('<link rel="stylesheet" type="text/css" href="%s" />', $path.$this->interface.".css");
-		elseif(file_exists($path.$this->interface.".php")) printf('<link rel="stylesheet" type="text/css" href="%s" />', $path.$this->interface.".php");
+		if($this->override) $interface = $this->interface_override; else $interface = $this->interface;
+		if(file_exists($iPath.$this->interface.".css")) printf('<link rel="stylesheet" type="text/css" href="%s" />'."\n", $path.$interface.".css");
+		elseif(file_exists($iPath.$this->interface.".php")) printf('<link rel="stylesheet" type="text/css" href="%s" />'."\n", $path.$interface.".php");
 		else Log::write("Interface::css() No $this->interface.(css|php) found.");
 	}
 	
 	public function meta() {
-		printf('<meta name="description" content="%s" />', $this->description);
-		printf('<meta name="keywords" content="%s" />', $this->keywords);
+		printf('<meta name="description" content="%s" />'."\n", $this->description);
+		printf('<meta name="keywords" content="%s" />'."\n", $this->keywords);
 	}
 	
-	public function head($b='css', $i='css') {
+	public function head() {
 		$this->title();
 		$this->css($b, $i);
 		$this->favicon();
-		$this->block();
+		$this->meta();
 		$this->javascript();
 	}
 	
@@ -113,19 +145,22 @@ class UserInterface {
 	/* Notifications */
 	public function notification() {
 		$args = func_get_args();
-		if(count($args) == 0) { # Echo All
-			foreach($this->notification[UIError] as $item) printf($this->template("Notification UIError"), $item);
-			foreach($this->notifiaction[UINotice] as $item) printf($this->template("Notification UINotice"), $item);
+		if(count($args) == 0 or $args[0] == UINotification) { # Echo All
+			foreach($this->notifications[UIError] as $item) printf($this->template("Notification UIError"), $item);
+			foreach($this->notifiactions[UINotice] as $item) printf($this->template("Notification UINotice"), $item);
 			return true;
 		} elseif(count($args) == 1) { # Echo <0type>
-			foreach($this->notification[$args[0]] as $item) printf($this->template("Notification {$args[0]}"), $item);
+			foreach($this->notifications[$args[0]] as $item) printf($this->template("Notification {$args[0]}"), $item);
 			return true;
 		} elseif(count($args) == 2) { # Return <0type> or Set <1string> to <0type>
-			if($args[1] == true) { # Return <0type>
+			if($args[1] === true) { # Return <0type>
 				if($args[0] == UINotification) { # Return All
-					return $this->notifications;
+					foreach($this->notifications[UIError] as $item) $x .= sprintf($this->template("Notification UIError"), $item);
+					foreach($this->notifiactions[UINotice] as $item) $x .= sprintf($this->template("Notification UINotice"), $item);
+					return $x;
 				} else { # Return <0type>
-					return $this->notifications[$args[0]];
+					foreach($this->notifications[$args[0]] as $item) $x .= sprintf($this->template("Notification {$args[0]}"), $item);
+					return $x;
 				}
 			} else { # Set <1string> to <0type>
 				$this->notifications[$args[0]][] = $args[1];
@@ -138,25 +173,168 @@ class UserInterface {
 	
 	public function notification_count($type=UINotification) {
 		# Count Errors
-		if($type == UIError or $type == UINotification) $error_count = count($this->errors);
+		if($type == UIError or $type == UINotification) $error_count = count($this->notifications[UIError]);
 		else $error_count = 0;
 
 		# Count Notices
-		if($type == UINotice or $Type == UINotification) $notice_count = count($this->notices);
+		if($type == UINotice or $Type == UINotification) $notice_count = count($this->notifications[UINotice]);
 		else $notice_count = 0;
 
 		return $error_count + $notice_count;
 	}
 
 	public function error($title, $message) {
-		Registry::fetch('System')->$override = true;
+		$this->override = true;
 		$this->interface_override = 'Box';
 		$this->content_override = sprintf($this->template("Notification Error"), $title, $message);
 	}
 	
-	public function interface_diagnostics() {
+	/* Menus */
+	public function menu($input, $pre=null, $item=null, $post=null) {
+		if(is_string($input)) { # Fetch menu by name
+			$input = crunch($input);
+			$result = MySQL::query("SELECT *  FROM `[prefix]menus` WHERE `name` = CONVERT(_utf8 '%s' USING latin1) COLLATE latin1_swedish_ci", $input);
+			if(mysql_num_rows($result) == 1) {
+				$menu = mysql_fetch_assoc($result);
+			} else {
+				Log::write("Interface::menu($input) Menu not found with name.");
+			}
+		} elseif(is_array($input)) { # Given menu array
+			$navigation = $input;
+		} else { # Fetch menu by id
+			$result = MySQL::query("SELECT *  FROM `[prefix]menus` WHERE `id` = %s ORDER BY `rank` ASC", $input);
+			if(mysql_num_rows($result) == 1) {
+				$menu = mysql_fetch_assoc($result);
+			} else {
+				Log::write("Interface::menu($input) Menu not found with id.");
+			}
+		} if(!isset($navigation)) { # Generate navigation from $menu
+			$result = MySQL::query("SELECT *  FROM `[prefix]navigation` WHERE `menu` = %s ORDER BY `rank` ASC", $menu['id']);
+			while($row = mysql_fetch_assoc($result)) $navigation[] = $row;
+		} # $navigation now complete
+		
+		if($pre === true) { # Return
+			return array('menu' => $menu, 'navigation' => $navigation);
+		} else { # Echo
+			if(is_null($pre)) $pre = $this->template("Menu Pre");
+			if(is_null($item)) $item = $this->template("Menu Item");
+			if(is_null($post)) $post = $this->template("Menu Post");
+			# Build the output
+			$output = $pre;
+			foreach($navigation as $link) {
+				if(substr($link['link'], 0, 5) == 'ex://') {
+					$lnk = substr($link['link'], 0, 5);
+					# Do `current` check here
+				} else {
+					$lnk = $link['link'];
+				} $output .= sprintf($item, $lnk, $link['name'], $current);
+			} $output .= $post;
+			echo $output;
+		}
+	}
+	
+	/* Sidebars */
+	public function sidebar() {
+		$args = func_get_args();
+		$id = array_shift($args);
+		if(is_null($id)) { # New
+			if(is_even(count($args))) {
+				$i = 0;
+				do {
+					$a = $i; $b = $i + 1;
+					$x[crunch($args[$a])] = $args[$b];
+					$i = $i + 2;
+				} while($i <= count($args));
+				$this->sidebars[] = $x;
+				$this->sidebar_counter++;
+				return $this->sidebar_counter--;
+			} else {
+				Log::write("Interface::sidebar(new) Bad argument layout. Make sure argument count, including key, is an odd number.");
+			}
+		} else { # Read or Edit
+			if($id == true) { # Read
+				if($args[0] == true) { # All Sidebars
+					if($args[1] == true) return $this->sidebars;
+					else {
+						$t_head = $this->template("Sidebar with Head");
+						$t_no_head = $this->template("Sidebar without Head");
+						foreach($this->sidebars as $id2 => $bar) {
+							if(!is_null($bar['title'])) printf($t_head, $bar['title'], $bar['content'], $id2);
+							else printf($t_no_head, $bar['content'], $id2);
+						}
+					}
+				} else { # Sidebars by location
+					foreach($this->sidebars as $id2 => $bar) $x[$id2] = $bar;
+					if($args[1] == true) return $x;
+					else {
+						$t_head = $this->template("Sidebar with Head");
+						$t_no_head = $this->template("Sidebar without Head");
+						foreach($x as $id2 => $bar) {
+							if(!is_null($bar['title'])) printf($t_head, $bar['title'], $bar['content'], $id2);
+							else printf($t_no_head, $bar['content'], $id2);
+						}
+					}
+				}
+			} else { # Edit
+				if(is_even($args)) {
+					$i = 0;
+					do {
+						$this->sidebars[$id][crunch($args[$i])] = $args[$i++];
+						$i = $i + 2;
+					} while($i <= count($args));
+				} else {
+					Log::write("Interface::sidebar(edit) Bad argument layout. Make sure argument count, inclding key, is an odd number.");
+				}
+			}
+		}
+	}
+	
+	public function sidebar_delete($id) {
+		if(isset($this->sidebars[$id])) unset($this->sidebar[$id]);
+		else Log::write("Interface::sidebar_delete($id) Sidebar with id is not set.");
+	}
+	
+	/* Template */
+	public function template($name) {
+		$name = crunch($name);
+		if(file_exists(root."Resources/UI/$this->ui/Templates/$name.t"))
+			return file_get_contents(root."Resources/UI/$this->ui/Templates/$name.t");
+		elseif(file_exists(root."Resources/UI/System/Templates/$name.t"))
+			return file_get_contents(root."Resources/UI/System/Templates/$name.t");
+		else Log::write("Interface::template($name) Template not found in system or user defined interface bundles.");
+	}
+
+	public function display_login() {
+		$this->interface_override = $this->login_window_interface;
+		$this->override_content = import("Login Window");
+		$this->override = true;
+	}
+	
+	/* Interface */
+	public function uinterface($set=null,$name=false) {
+		if(is_null($set)) {
+			if($this->override) {
+				$name = $this->interface_keys[$this->interface_override];
+				return root."Resources/UI/{$this->ui}/Interfaces/{$name}";
+			} else {
+				$name = $this->interface_keys[$this->interface];
+				return root."Resources/UI/{$this->ui}/Interfaces/{$name}";
+			}
+		} else $this->interface = $set;
+	}
+
+	public function content() {
+		if($this->override) {
+			echo $this->content_override;
+		} else {
+			echo $this->content;
+		}
+	}
+
+	/* Debug */
+	public function diagnostics($return=false) {
 		# $content;
-		if(!is_null($this->content)) $output['content'] = strlen($this->content)." Characters<br />\n".$this->content;
+		if(!is_null($this->content)) $output['content'] = strlen($this->content)." Characters";
 		else $output['content'] = "NULL";
 		# $content_override;
 		if(!is_null($this->content_override)) $output['content-override'] = strlen($this->content_override)." Characters<br />\n".$this->content_override;
@@ -167,10 +345,14 @@ class UserInterface {
 		}
 		# $ui;
 		$output['UI'] = $this->ui;
+		# $path;
+		$output['path'] = $this->path;
 		# $default_interface;
 		$output['default-interface'] = $this->default_interface;
 		# $interface_override;
 		$output['interface-override'] = $this->interface_override;
+		# $login_window_interface;
+		$output['login-window-interface'] = $this->login_window_interface;
 		# $interface;
 		$output['interface'] = $this->interface;
 		# $title_template;
@@ -190,40 +372,46 @@ class UserInterface {
 		# $keywords;
 		$output['keywords'] = $this->keywords;
 		# $favicon;
-		if($this->favicon) $path = $this->favicon;
+		if($this->favicon) $favicon = "TRUE ".$this->favicon;
 		else {
 			$path = "Resources/UI/{$this->ui}/Images/favicon.";
-			if(file_exists($path.".png")) $favicon = $path.".png";
-			elseif(file_exists($path.".ico")) $favicon = $path.".ico";
-			elseif(file_exists($path.".gif")) $favicon = $path.".gif";
-			else $favicon = "NULL";
+			if(file_exists($path."png")) $favicon = "TRUE ".$path."png";
+			elseif(file_exists($path."ico")) $favicon = "TRUE ".$path."ico";
+			elseif(file_exists($path."gif")) $favicon = "TRUE ".$path."gif";
+			else $favicon = false;
 		} $output['favicon'] = $favicon;
 		# $apple_icon;
-		$output['apple-icon'] = "Unsupported ATM";
+		if($this->apple_icon) $icon = "TRUE ".$this->apple_icon;
+		else {
+			$path = "Resources/UI/{$this->ui}/Images/appleicon.png";
+			if(file_exists($path)) $icon = "TRUE ".$path;
+			else $icon = false;
+		} $output['apple-icon'] = $icon;
+		# $override = false;
+		$output['override'] = $this->override;
 		# $direct_echo = false;
-		if($this->direct_echo) $output['direct-echo'] = 'TRUE';
-		else $output['direct-echo'] = 'FALSE';
+		$output['direct-echo'] = $this->direct_echo;
 		# $javascript = array();
 		# javascript[head]
 		if(!is_null($this->javascript['head'])) $output['javascript-head'] = strlen($this->javascript['head'])." Characters<br />\n".$this->javascript['head'];
-		else $output['javascript-head'] = 'NULL';
+		else $output['javascript-head'] = null;
 		# javascript[body]
 		if(!is_null($this->javascript['body'])) $output['javascript-body'] = strlen($this->javascript['body'])." Characters<br />\n".$this->javascript['body'];
-		else $output['javascript-body'] = 'NULL';
+		else $output['javascript-body'] = null;
 		# javascript[include_head]
 		if(count($this->javascript['include_head']) > 0) {
 			$output['javascript-include-head'] = count($this->javascript['include_head'])." Items<br />\n";
-			foreach($this->javascript['include_had'] as $item) {
+			foreach($this->javascript['include_head'] as $item) {
 				$output['javascript-include-head'] .= $item;
 			}
-		} else $output['javascript-include-head'] = 'NULL';
+		} else $output['javascript-include-head'] = null;
 		# javascript[include_body]
 		if(count($this->javascript['include_body']) > 0) {
 			$output['javascript-include-body'] = count($this->javascript['include_body'])." Items<br />\n";
 			foreach($this->javascript['include_body'] as $item) {
 				$output['javascript-include-body'] .= $item;
 			}
-		} else $output['javascript-include-body'] = 'NULL';
+		} else $output['javascript-include-body'] = null;
 		# $notifications = array();
 		# notifications[UIError]
 		if(count($this->notifications[UIError]) > 0) {
@@ -231,31 +419,33 @@ class UserInterface {
 			foreach($this->notifications[UIError] as $item) {
 				$output['notification-errors'] .= $item;
 			}
-		} else $output['notification-errors'] = 'NULL';
+		} else $output['notification-errors'] = null;
 		# notifications[UINotice]
 		if(count($this->notifications[UINotice]) > 0) {
 			$output['notification-notices'] = count($this->notifications[UINotice])." Notices<br />\n";
 			foreach($this->notifications[UINotice] as $item) {
 				$output['notification-notices'] .= $item;
 			}
-		} else $output['notification-notices'] = 'NULL';
+		} else $output['notification-notices'] = null;
 		# $sidebars = array();
-		$output['sidebars'] = 'Unsupported ATM';
-		
-		echo "<pre><table>";
-		foreach($output as $name => $value) {
-			$value = str_replace('NULL', '<span style="color:yellow">NULL</span>', $value);
-			$value = str_replace('TRUE', '<span style="color:green">TRUE</span>', $value);
-			$value = str_replace('FALSE', '<span style="color:red">FALSE</span>', $value);
-			printf('<span style="color:#2C68C1;">[%s]</span>&nbsp;%s<br />', uncrunch($name), $value);
+		$output['sidebar-count'] = count($this->sidebars);
+		$output['sidebar-counter'] = $this->sidebar_counter;
+		if(count($this->sidebars) > 0)
+		foreach($this->sidebars as $id => $bar) {
+			$output['sidebar-'.$id] = "<span style=\"color:#46A4FA;\">[{$bar['title']}]</span><br />\n{$bar['content']}";
 		}
-		echo "</table></pre>";
+		
+		return diagnostic($output, $return);
 	}
 	
 }
 
+/* Shortcuts */
 function add($string) {
 	Registry::fetch('Interface')->content .= $string;
 }
 
-?>
+function path($return=false) {
+	if($return) return Registry::fetch('Interface')->path;
+	else echo Registry::fetch('Interface')->path;
+}

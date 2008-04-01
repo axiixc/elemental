@@ -160,62 +160,45 @@ class UserAuthentication {
 		Log::write("User Authentication Mode: $this->mode");
 	}
 	
-	public function requireType() {
+	public function require_type() {
 		if($this->verification != false) {
 			$types = func_get_args();
 			foreach($types as $type) $switch = ($type == $this->type) ? true : false ;
 			if($switch) {
-				$this->load_state = 'application';
 				$this->verification = true;
 			} elseif($type == UATypeGuest) {
-				$this->load_state = 'login';
+				Registry::fetch('Interface')->display_login();
 				$this->verification = false;
-				
-				#YOU FELL ASLEEP HERE
-				#TODO fix from here down
-				#UI LIBRARY
-				Registry::fetch('Interface')->notificationAdd(UIError, "You must login to access this page");
-				// Condense the notificationAdd to just notification
-				// notification(); will return array of all notifications
-				// notification(UIError); will return array of all UIError notifications
-				// notification(UINotification, true); will echo as <div class="UIError/UINotice">Msg</div>
-				// notification(UINotice, false); will return count of UINotice
-				// notification(UIError, "Hello"); well add a UIError
-				// Special Syntax: [[APPLICATION]] - Default Home Application
-				// Special Syntax: [[LOGIN]] Login window
-				// Special Syntax: [[]]
+				Registry::fetch('Interface')->notification(UIError, "You must login to access this page.");
 			} else {
-				Registry::fetch('EX')->load_state = 'override';
 				$this->verification = false;
-				Registry::fetch('UI')->error("Permission Denied", "You do no have access rights for this page.");
+				Registry::fetch('Interface')->error("Permission Denied", "You do not have access rights for this page.");
 			} return $switch;
 		} else return false;
 	}
 	
-	public function requireRole() {
+	public function require_role() {
 		if($this->verification != false) {
 			$roles = func_get_args();
 			foreach($roles as $role) $switch = (in_array($role, $this->roles)) ? true : false ;
 			if($switch) {
-				Registry::fetch('EX')->load_state = 'application';
 				$this->verification = true;
-			} elseif($type == UATypeGuest) {
-				Registry::fetch('EX')->load_state = 'login';
+			} elseif($this->type == UATypeGuest) {
+				Registry::fetch('Interface')->display_login();
 				$this->verification = false;
-				Registry::fetch('UI')->notificationAdd(UIError, "You must login to access this page");
+				Registry::fetch('Interface')->notification(UIError, "You must login to access this page.");
 			} else {
-				Registry::fetch('EX')->load_state = 'override';
 				$this->verification = false;
-				Registry::fetch('UI')->error("Permission Denied", "You do no have access rights for this page.");
+				Registry::fetch('Interface')->error("Permission Denied", "You do not have access rights for this page.");
 			} return $switch;
-		}
+		} else return false;
 	}
 	
 	public function type() {
 		$types = func_get_args();
 		if(count($types) > 0) {
 			foreach($types as $type) $switch = ($type == $this->type) ? true : false ;
-			return $switch;
+			return $swtich;
 		} else return $this->type;
 	}
 	
@@ -228,7 +211,7 @@ class UserAuthentication {
 	}
 	
 	private function killSession() {
-		Registry::fetch('EX')->end("Force Kill");
+		Registry::fetch('System')->end("Force Kill");
 	}
 	
 }

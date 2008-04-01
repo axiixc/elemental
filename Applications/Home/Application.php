@@ -1,5 +1,5 @@
-<?php # Home [axiixc] : Basic Homescreen Application (does nothing really)
+<?php # Home [axiixc] : Application Code
 
-UIAdd('<pre>');
-UIAdd(file_get_contents(root.'README'));
-UIAdd('</pre>');
+Registry::register("Application", new Home);
+
+Registry::fetch("Interface")->uinterface('1Bar');

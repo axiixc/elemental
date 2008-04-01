@@ -2,20 +2,26 @@
 
 class System {
 	
-	public $app, $ui, $directecho, $override;
+	public $app;
+	public $override = false;
 	
 	public function __construct() {
 		# Application
-		if(isset($_GET['app'])) $this->app = path_safe($_GET['app']);
-		else $this->app = Conf::read('Application');
-		
-		# UI
-		$this->ui = Conf::read('UI');
+		if(isset($_GET['app'])) $this->app = strtolower(path_safe($_GET['app']));
+		else $this->app = strtolower(Conf::read('Application'));
 	}
 	
-	public function directecho($x=null) {
-		if(is_null($x)) return $this->directecho;
-		else $this->directecho = $x;
+	public function diagnostics($return=false) {
+		$output['Application'] = $this->app;
+		$output['override'] = $this->override;
+		return diagnostic($output, $return);
+	}
+	
+	public function end($reason) {
+		$die = import("Permanant Session Log");
+		$die[time()] = $reason;
+		register_resource("Permanant Session Log", $die);
+		die("Your session was forcefully killed by the watchdog.");
 	}
 	
 }
@@ -32,7 +38,7 @@ function package($id) {
 	}
 }
 
-function library() {
+function library($id) {
 	if(file_exists(root."Resources/Library/$id.php")) {
 		return root."Resources/Library/$id.php";
 	} else {

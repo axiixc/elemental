@@ -1,6 +1,6 @@
-<?php # default_user_conf : System Resource
+<?php # User Conf : System Resource
 
 $resource_type = 'array';
-$resource = '';
+$resource = 'a:0:{}';
 
 ?>
