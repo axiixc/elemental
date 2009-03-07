@@ -1,43 +1,36 @@
 <?php # UI Sidebar Library : Create and Modify sidebars
 
-# Probably needs work
-# Um.. how to tie into UI.ui
-
-# New system uses an id assigned on creation
-$system['UI']['sidebar-counter'] = 0;
-function UISidebarWrite($title=null,$content=null,$col=null,$id=false) {
+function UISidebarWrite($title=null,$content=null,$col=null,$id=null) {
 	global $system;
-	if($id == false) {
-		$id = $system['UI']['sidebar-counter'];
-		$tmp[$id]['title'] = $title;
-		$tmp[$id]['content'] = $content;
-		if(in_array($col,$col_types)) $tmp[$id]['col'] = $col;
-		else $tmp[$id]['col'] = 'sidebar-1';
-		# Write the tmp array
-		$system['UI']['sidebar'] = $tmp;
-		$system['UI']['sidebar-counter'] = $id + 1;
-		return $id;
-	} else {
-		if(!is_null($title)) $tmp['title'] = $title;
-		if(!is_null($content)) $tmp['content'] = $content;
-		if(!is_null($col) and in_array($col,$col_types)) $tmp['col'] = $col;
-		# And write it
+	if(!is_null($id) and !is_null($system['UI']['sidebar'][$id])) { # Edit Mode
+		if(!is_null($title)) $system['UI']['sidebar'][$id]['title'] = $title;
+		if(!is_null($content)) $system['UI']['sidebar'][$id]['content'] = $content;
+		if(!is_null($col)) $system['UI']['sidebar'][$id]['col'] = $col;
+	} else { # New Mode
+		if(is_null($id)) $id = $system['UI']['sidebar-count'];
+		$system['UI']['sidebar-count']++;
+		if(is_null($col)) $col = UISidebarMain;
+		$tmp = array('title' => $title, 'content' => $content, 'col' => $col);
 		$system['UI']['sidebar'][$id] = $tmp;
-		return $id;
-	}
+	} return $id;
 }
 
-# seperate multiple with comma, spaces removed automagically
-# true will output ALL sidebar objects
-# true can not be used with other col ids
-function UISidebar($col) {
+function UISidebarDelete($id) {
 	global $system;
-	if($col == true) $cols_active[0] = true;
-	else $cols_active = explode(',', str_replace(' ', null, $col));
-	$template = '<div class="item" id="%s"><h1>%s</h1>%s</div>';
-	foreach($cols_active as $col) if(!$system['sidebar-count'] == 0) {
-		foreach($system['UI']['sidebar'] as $id => $bar) if($col == $bar['col'] or $col == true) 
-			$sb_object = $sb_object.sprintf($template,$bar['title'],$bar['content']);
-		echo $sb_object; return true;
-	} else return false;
+	unset($system['UI']['sidebar'][$id]);
+}
+
+function UISidebar($id=true) {
+	global $system;
+	$template = '<div class="item" id="%s"">%s%s</div>';
+	if($id == true) $sb_items = $system['UI']['sidebar']; # Using all
+	else { # Using only a few
+		$cols_active = explode(',', str_replace(' ', null, $id));
+		foreach($system['UI']['sidebar'] as $id => $col) 
+			if(in_array($col['col'], $cols_active)) $sb_items[$id] = $col;
+	} if(!is_null($sb_items)) foreach($sb_items as $id => $col) {
+		if(!is_null($col['title'])) $hTag = "<h1>{$col['title']}</h1>";
+		else $hTag = null;
+		$sb_object = $sb_object . sprintf($template, $id, $hTag, $col['content']);
+	} echo $sb_object;
 }

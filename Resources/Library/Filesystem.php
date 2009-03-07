@@ -3,9 +3,9 @@
 # Directory Specific Functions
 function FSDirRead($path, $full=true, $keyformat=null, $post='/') {
 	if(file_exists($path)) {
-		$dir_handle = @opendir($path);
-		while($file = readdir($dir_handle)) {
-			if($file != '.' and $file != '..' and strtolower($file) != '.ds_store') {
+		$temp = scandir($path);
+		foreach($temp as $file) {
+			if(!in_array(strtolower($file), array('.', '..', '.ds_store'))) {
 				# Can be condensed?
 				if($keyformat == lower_case_filename) $key = strtolower(filename($file));
 				elseif($keyformat == lower_case_basename) $key = strtolower($file);
@@ -19,11 +19,16 @@ function FSDirRead($path, $full=true, $keyformat=null, $post='/') {
 				if(!$full) $output[$key] = $file . $post;
 				else $output[$key] = $path . $file . $post;
 			}
-		} closedir($dir_handle); return $output;
-	} else return $output;
-} # Think about using scandir() instead
+		} return $output;
+	}
+}
 
-function FSDirMake($path) { if(!file_exists($path)) { mkdir($path); return true; } else return false; }
+function FSDirMake($path) { 
+	if(!file_exists($path)) { 
+		mkdir($path); 
+		return true; 
+	} else return false; 
+}
 
 # General Filesystem Functions
 function FSRename($path,$rename) {
@@ -50,8 +55,8 @@ function FSRename($path,$rename) {
 	}
 }
 
-function FSMove($path, $to) { if(FSRename($path, $to)) return true; else return false; }
-function FSCopy($path,$to) { if(copy($path,$to)) return true; else return false; }
+function FSMove($path, $to) { return FSRename($path, $to); }
+function FSCopy($path,$to) { return copy($path, $to); }
 
 function FSDelete($path) {
 	$original_path = $path;
@@ -73,21 +78,28 @@ function FSDelete($path) {
 	} return true;
 }
 
+# FSPermissions, FSOwner, FSGroup Unsupported
 function FSPermissions($path, $permissions, $recursive) { return false; }
 function FSOwner($path, $owner, $recursive) { return false; }
 function FSGroup($path, $group, $recursive) { return false; }
 
 # File Specific Functions
 function FSRead($path, $username=false, $password=false) {
-	if($username and $password) { $auth = "$username@$password:";
-		if(substr(ltrim($path), 8, -8) == 'https://') { 
-			$prefix = 'https://'; $suffix = substr($path, 8); 
-		} elseif(substr(ltrim($path), 7, -7) == 'http://') { 
-			$prefix = 'http://'; $suffix = substr($path, 7); 
-		} else { 
-			$prefix = null; $auth = null; $suffix = $path;
+	if($username and $password) { # Remote (Auth)
+		$auth = "$username@$password:";
+		if(substr(ltrim($path), 8, -8) == 'https://') {
+			$prefix = 'https://'; 
+			$suffix = substr($path, 8);
+		} elseif(substr(ltrim($path), 7, -7) == 'http://') {
+			$prefix = 'http://';
+			$suffix = substr($path, 7);
+		} else {
+			$prefix = null; 
+			$auth = null; 
+			$suffix = $path;
 		} $use_path = $prefix . $auth . $suffix;
-	} return file_get_contents($use_path);
+	} else $use_path = $path; # Local or Remote (No Auth)
+	return file_get_contents($use_path);
 }
 
 function FSEdit($path, $contents, $mode) {
@@ -97,6 +109,7 @@ function FSEdit($path, $contents, $mode) {
 	fclose($handle);
 }
 
+# Shortcuts, use if you wish
 function FSWrite($path, $contents) { return FSEdit($path, $contents, w); }
 function FSAppend($path, $contents) { return FSEdit($path, $contents, a); }
 function FSMake($path) { return FSEdit($path, nil, w); }

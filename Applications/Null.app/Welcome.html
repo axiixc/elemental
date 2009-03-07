@@ -1,0 +1,33 @@
+<h3><img src="Resources/UI/BriteNite.ui/Images/ex_logo_ltgrey.png"></h3>
+<p>Written fully in PHP, Elemental (EX) attempts to provides the simplest get-going framework for web application development. It takes the common tasks of application development and does them for you, yet leaves enough flexibility you can create anything.</p>
+
+<p>The key to this how EX manages content, resources, user sessions and even your data*. The only functions you won't see are direct echo, unless you want to. This is because it uses a fully managed UI for content, sidebars, notifications and menus. All of the thinking and hard work is already loaded and just waiting to be called.</p>
+<i>*Not Implimented.</i>
+
+<h2>Limitation of the BETA and Roadmap</h2>
+<p>While hugely feature-full already, EX has a ton of planned development before its BETA2,  let alone the first stable version. Currently lacking in memory optimization, Managed Data libraries, caching, archive support, large file uploads and the Automagical Engine, there is a lot left to do.</p>
+
+<b>Memory Optimization</b><br />
+<p>Early in this project my focus was not on good, clean code but working code. Now the code has been cleaned out but there are a few specific memory bugs to work out. Each load runs about 20+ PHP scripts via include/require. I would like to get this number down to the bare minimum and reduce the number of declared functions and definitions to those required by the run.</p>
+
+<b>Managed Data Libraries</b><br />
+<p>These are my approach to making data management easy with no need for SQL know-how. However they are not a high concern and as such not much thought has been put into their implementation at this time.</p>
+
+<b>Caching and Archive Support</b><br />
+<p>In an effort to improve load time, static or near static content needs to be cached so that it is not generated every run. Candidates are menus, pages, and some meta. Archives are also under investigation for compression of javascript to increase client download.</p>
+
+<b>FTP File Upload</b><br />
+<p>This or any other method that allows for fast and large file upload. One of the most pressing limits of HTML and PHP file uploads is that PHP must be configured to handle large files by setting ridiculous and dangerous limits on memory consumption. I hope to offer a bundled solution by release day.</p>
+
+<b>Automagical Engine</b>
+<p>This will tie in greatly with may of the aforementioned points. It will consist of binaries and shell scripts that run as a single instance in the background and do tasks for PHP abstracted from the runtime. They will also take care of regular maintenance and cleanup for EX. Since I live on a mac and in linux servers, these are the first systems to be targeted, however cross compatibility is a key issue.</p>
+
+<hr />
+<p>One of the main concerns of EX is to allow upgrades without fear. Once EX goes to release a system update function will be included which will allow PHP to update itself with no trouble. This is because everything is wrapped in EX's build-in functions, and if all inputs and outputs are left, your code will work fine, leaving the supporting framework open to improvement. However, EX is currently BETA and thus this cannot be guaranteed. The standards and conventions are evolving as I move through developing, and just get better. But as a precaution, until version 2 even, be worry of this, but all attempts are made to keep this working version to version.</p>
+
+<h2>Developer ID</h2>
+<i>or Developer Account</i>
+<p>A Developer ID is just and account that you use to host your code off of us. The Developer ID is in no way required to develop for EX but a bundle with a valid DevID and author can be looked up through the Bundle Manager and updates can be installed with the system updater library. A DevID is meant to be public, and it is perfectly fine it slips into the public.</p>
+
+<p>A DevID is tied to an existing account on our site, just go to your Preferences and click "Register as a Developer" under Misc. This gives you access to host up to $limit code on our server and push bundles public for access in the Bundle Manager. However, it is worth noting that there is a slight approval process, but don't be afraid. The only real requirements are that your bundle be tested, (and after a few times we will start to trust you), that it is not malicious (adurh), and that it uses EX like code conventions. That last one is a little vague, basically don't use echo instead of UIAdd() etc... (Obviously some bundles will use echo, but do so with UIDirectEcho(true);).</p>
+<b>NOTE:</b> Even without a DevID you can set up a repo for Bundle Manager.

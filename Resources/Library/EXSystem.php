@@ -2,7 +2,7 @@
 
 # Set values
 $system['default-ui'] = EXConfRead('default-ui');
-if(isset($_GET['app'])) $system['default-app'] = strtolower(EXPathSafe($_GET['app'], true));
+if(isset($_GET['app'])) $system['default-app'] = strtolower($_GET['app']);
 else $system['default-app'] = strtolower(EXConfRead('default-application'));
 
 # Define Functions
@@ -12,6 +12,7 @@ function EXSystemUI($ui=false) {
 	else return $system['default-ui']; 
 }
 
-function EXSystemApp() { global $system; return strtolower($system['default-app']); }
+function EXApp() { global $system; return strtolower($system['default-app']); }
+function EXDefaultApp() { return EXConfRead('default-application'); }
 function EXDebugMode() { return EXConfRead('mode-debug'); }
-function EXDevMode()   { return EXConfRead('mode-development'); }
+function EXDevMode() { return EXConfRead('mode-development'); }

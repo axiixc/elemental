@@ -34,6 +34,7 @@ function UINotification($type, $return=false) {
 
 # Fullscreen, huge override, error message
 function UIError($title, $message) {
-	global $system; UIInterface('Box');
-	UIAdd(sprintf('<h1 class="UIError">%s</h1><div class="UIError">%s</div>', $title, $message);
+	global $system;
+	UIInterface('Box');
+	UIAdd(sprintf('<h1 class="UIError">%s</h1><div class="UIError">%s</div>', $title, $message));
 }

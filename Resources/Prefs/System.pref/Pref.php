@@ -2,7 +2,7 @@
 
 UIMetaSetHeadTitle('System');
 
-$result = EXMySQLQueryOld('SELECT * FROM `[prefix]conf`');
+$result = EXMySQLQuery('SELECT * FROM `[prefix]conf`');
 while($vars = mysql_fetch_assoc($result)) $sys[$vars['key']] = $vars['value'];
 
 include root.'Resources/MySQLConf.php';

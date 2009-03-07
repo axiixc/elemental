@@ -2,23 +2,26 @@
 
 # NEEDS MAJOR WORK old from v.1
 
-function UIMenu($id,$array=false,$return=false) {
-	# Determin the menu ID 
-	$t = mysql_fetch_assoc(EXMySQLQuery("SELECT * FROM `[prefix]menus` WHERE `name` = CONVERT(_utf8 '{$id}' USING latin1) COLLATE latin1_swedish_ci");
+function UIMenu($id,$class=UIMenu,$title=null,$array=false,$return=false) {
+	# TODO class="UICurrent"
+	$t = mysql_fetch_assoc(EXMySQLQuery("SELECT * FROM `[prefix]menus` WHERE `name` LIKE CONVERT(_utf8 '$id' USING latin1) COLLATE latin1_swedish_ci"));
 	$menu = $t['id'];
 
-	$result = EXMySQLQueryOld("SELECT * FROM `[prefix]navigation` WHERE `menu` = {$menu} ORDER BY `rank` ASC LIMIT 0, 100 ");
+	$result = EXMySQLQuery("SELECT *  FROM `[prefix]navigation` WHERE `menu` = $menu ORDER BY `rank` ASC");
 	
-	if($array) while($nav = mysql_fetch_assoc($result)) { 
+	if($array) while($nav = mysql_fetch_assoc($result)) { # Return an array
 		$output[$nav['id']]['link'] = $nav['link']; 
 		$output[$nav['id']]['name'] = $nva['name']; 
-	} else {
-		$output = '<ul>'; # the opening list tag
+	} else { # Create HTML structure
+		$output = "<ul class=\"$class\">"; # the opening list tag
+		if(!is_null($title)) $output = $output."<h2>$title</h2>";
 		while($nav = mysql_fetch_assoc($result)) $output = $output."\t<li><a href=\"{$nav['link']}\">{$nav['name']}</a></li>\n";
 		$output = $output.'</ul>'; # closing list tag
-	} if($return) echo $output; else return $output;
+	} if($return) return $output; else echo $output;
 }
 
+# Is the submenu function something that will be kept, needs better implimentation
+# Consider all below this DEPRICATED
 $system['UI']['submenu-width'] = FALSE;
 function UISubmenuReset() { 
 	global $system; unset($system['UI']['submenu']); 

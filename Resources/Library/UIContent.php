@@ -3,7 +3,7 @@
 # WTF why doesn't UIContent Func Work???
 
 $system['UI']['content'] = null;
-function UIContentAdd($content) { global $system; echo $content; }
+function UIContentAdd($content) { global $system; $system['UI']['content'] = $system['UI']['content'] . $content; }
 function UIAdd($str) { UIContentAdd($str); } # Shortcut to UIContentAdd();
 function UIContentRead() { global $system; return $system['UI']['content']; }
 function UIContent() { global $system; echo $system['UI']['content']; }

@@ -1,9 +1,14 @@
 <?php # Dictionary : System dictionary entries
 
+# System Version
+define('EXSystemVersion', 0.2);
+
 # System Definitions
 define('UIError',        'UINotificationWithTypeError');
 define('UINotice',       'UINotificationWithTypeNotice');
 define('UINotification', 'UINotificationWithGenericType');
+define('UISidebarMain',  'UISidebarMain');
+define('UISidebarOther', 'UISidebarOther');
 
 # Time
 define('EXDateSortableDateFormat', 'Ymd'); # Depreciated
@@ -60,5 +65,7 @@ define('UAApplication', 'UAApplication');
 define('MLDS1', '[%1%]'); define('MLDS2', '[%2%]'); define('MLDS3', '[%3%]');
 define('MLDS4', '[%4%]'); define('MLDS5', '[%5%]'); define('MLDS6', '[%6%]');
 define('MLDS7', '[%7%]'); define('MLDS8', '[%8%]'); define('MLDS9', '[%9%]');
+define('MLDF', '[%@%]');
+define('MLDS', '[%#%]');
 
 # User Definitions

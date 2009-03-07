@@ -1,4 +1,4 @@
-<?php
+<?php # Filetype Library : Used by Utilities > 
 
 $mime_types = array('323'     => 'text/h323',
 					'acx'     => 'application/internet-property-stream',

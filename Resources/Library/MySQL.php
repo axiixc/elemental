@@ -12,17 +12,8 @@ function EXMySQLQuery() {
 	$sql = array_shift($args);
 	$sql = str_replace('[prefix]', $system['prefix'], $sql);
 	$sql = str_replace('[database]', $system['database'], $sql);
-	$sql = vsprintf($sql, $args);
+	if(count($args) > 0) $sql = vsprintf($sql, $args);
 	return mysql_query($sql);
-}
-
-function EXMySQLQueryOld($sql) {
-	global $system;
-	$sql = str_replace('[prefix]', $system['prefix'], $sql);
-	$sql = str_replace('[database]', $system['database'], $sql);
-	$output = mysql_query($sql);
-	if(!mysql_error()) return $output;
-	else { echo mysql_error(); return false; }
 }
 
 function EXMySQLSetConf($user,$pass,$host,$base,$prefix) {
@@ -32,3 +23,27 @@ function EXMySQLSetConf($user,$pass,$host,$base,$prefix) {
 	if(!fwrite($handle,$output)) return false; else return true;
 	fclose($handle); return $output;
 }
+
+function EXFold($myarray) {
+	global $EXFold_output, $EXFold_parentkey;
+	foreach($myarray as $key=>$value){
+		if (is_array($value)) {
+			$EXFold_parentkey .= $key.MLDF;
+			EXFold($value,$output,$parentkey);
+			$EXFold_parentkey = "";
+		} else $EXFold_output .= $EXFold_parentkey.$key.MLDF.$value.MLDS;
+	} return $EXFold_output;
+}
+
+function EXUnfold($string){
+	$lines = explode(MLDS,$string);
+	foreach ($lines as $value){
+		$items = explode(MLDF,$value);
+		if (sizeof($items) == 2) $myarray[$items[0]] = $items[1];
+		else if (sizeof($items) == 3) $myarray[$items[0]][$items[1]] = $items[2];
+	} return $myarray;
+}
+
+$i = EXFold($system);
+echo $i."\n\n";
+print_r(EXUnfold($i));

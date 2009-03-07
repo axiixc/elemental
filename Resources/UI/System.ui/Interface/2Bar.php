@@ -11,4 +11,3 @@
 		<?php UIContent(); ?>
 	</body>
 </html>
-<?php print_r($system); ?>

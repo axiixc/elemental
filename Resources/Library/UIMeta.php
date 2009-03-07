@@ -31,7 +31,14 @@ function UIMetaHeadTitle($title=null, $return=false) {
 			$output = str_replace('%a',$system['UI']['title'],$title);
 		}
 	} else $output = $title; 
-	if($return) echo "\t<title>$output</title>\n"; else echo $output;
+	if($return) return $output; else echo "\t<title>$output</title>\n";
+}
+
+function UIMetaCSS($b='css', $i='css') {
+	$ui = 'Resources/UI/'.EXSystemUI().'.ui/';
+	$interface = substr(UIInterface(), 0, -4);
+	echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".ui."Style/Base.$b\" />";
+	echo "<link rel=\"stylesheet\" type=\"text/css\" href=\"".ui."Style/$interface.$i\" />";
 }
 
 function UIMetaBlock() {
@@ -41,4 +48,10 @@ function UIMetaBlock() {
 	echo "\t<meta name=\"keywords\" content=\"$keywords\">\n";
 }
 
-function UIMetaHeadBlock() { UIMetaHeadTitle(null, true); UIMetaBlock(); UIMetaFaviconHTML(); UIJavascript(); }
+function UIMetaHeadBlock($title=null, $return=false, $b='css', $i='css') { 
+	UIMetaHeadTitle($title, $return); 
+	UIMetaCSS($b, $i);
+	UIMetaBlock(); 
+	UIMetaFaviconHTML(); 
+	UIJavascript(); 
+}

@@ -13,12 +13,12 @@ $conf_template = array(); $default_user_conf = null; $default_guest_null = null;
 # Setup the Session-ness
 if(!is_null($_COOKIE['sess_id'])) { # Attempt to awake old session
 	$session_id = EXmySQLSafe($_COOKIE['sess_id']);
-	$session_result = EXMySQLQueryOld("SELECT *  FROM `[prefix]sessions` 
+	$session_result = EXMySQLQuery("SELECT *  FROM `[prefix]sessions` 
 		WHERE `id` = CONVERT(_utf8 '{$sess_id}' USING latin1) COLLATE latin1_swedish_ci");
 	$session = mysql_fetch_assoc($session_result);
 	
 	# Get info on the user
-	$user_result = EXMySQLQueryOld("SELECT * FROM `[prefix]users` 
+	$user_result = EXMySQLQuery("SELECT * FROM `[prefix]users` 
 		WHERE `username` = CONVERT(_utf8 '{$session['user']}' USING latin1) COLLATE latin1_swedish_ci");
 	$user = mysql_fetch_assoc($user_result);
 	
@@ -63,7 +63,7 @@ if(!is_null($_COOKIE['sess_id'])) { # Attempt to awake old session
 	} else { # Destroy the current session and make a new one
 		
 		if(mysql_num_rows($session_result) > 0)
-			EXMySQLQueryOld("DELETE FROM `[prefix]sessions` 
+			EXMySQLQuery("DELETE FROM `[prefix]sessions` 
 			WHERE CONVERT(`[prefix]sessions`.`id` USING utf8) = '{$sess_id}' LIMIT 1");
 		setcookie('sess_id', null, destroy);
 		setcookie('sess_user', null, destroy);
@@ -78,7 +78,7 @@ if(isset($_POST['UAU']) and isset($_POST['UAP'])) { # Login from a form
 	
 	$username = EXMySQLSafe($_POST['UAU']); 
 	$password = md5($_POST['UAP']);
-	$user = mysql_fetch_assoc(EXMySQLQueryOld("SELECT * FROM `[prefix]users` 
+	$user = mysql_fetch_assoc(EXMySQLQuery("SELECT * FROM `[prefix]users` 
 		WHERE `username` = CONVERT(_utf8 '{$username}' USING latin1) COLLATE latin1_swedish_ci"));
 	
 	if($password == $user['password']) { # Verified! 
@@ -103,7 +103,7 @@ if(isset($_POST['UAU']) and isset($_POST['UAP'])) { # Login from a form
 
 		setcookie('sess_id', $sess_id, $auth['session-limit']);
 		setcookie('sess_verify', $sess_verify, $auth['session-limit']);
-		EXMySQLQueryOld("INSERT INTO `[database]`.`[prefix]sessions` (`id`, `key`, `user`, `conf`, `expire`, `guest`) 
+		EXMySQLQuery("INSERT INTO `[database]`.`[prefix]sessions` (`id`, `key`, `user`, `conf`, `expire`, `guest`) 
 			VALUES ('$sess_id', '$sess_key', '$sess_user', '$default_user_conf', '{$auth['session-limit']}', $sess_guest);");
 	
 	} else $gsession = true;
@@ -127,7 +127,7 @@ if(isset($_POST['UAU']) and isset($_POST['UAP'])) { # Login from a form
 
 	setcookie('sess_id', $sess_id, $auth['session-limit']);
 	setcookie('sess_verify', $sess_verify, $auth['session-limit']);
-	EXMySQLQueryOld("INSERT INTO `[database]`.`[prefix]sessions` (`id`, `key`, `user`, `conf`, `expire`, `guest`) 
+	EXMySQLQuery("INSERT INTO `[database]`.`[prefix]sessions` (`id`, `key`, `user`, `conf`, `expire`, `guest`) 
 		VALUES ('$sess_id', '$sess_key', '$sess_user', '$default_guest_conf', '{$auth['session-limit']}', $sess_guest);");
 
-} print_r($session); print_r($auth); # For debug
+} # print_r($session); print_r($auth); # For debug
