@@ -1,46 +1,46 @@
-<?php # System : Constructor
+<?php # System [ axiixc ] : Framework Glue
 
-# Include the base libraries
-$system = array(); # This is a nice var
-require EXScriptDir() . 'Resources/Library/Dictionary.php';
-$lib = array('ErrorCodes', 'MySQL', 'Utilities', 'Filesystem', 'EXConf', 'EXSystem', 'EXBundles', 'UIContent', 
-	'UIInterface', 'UIMenus', 'UIJavascript', 'UIMeta', 'UINotifications', 'UISidebar', 'UAActions', 'UAChecks');
-foreach($lib as $library) require lib.$library.'.php';
+# include all required files
+$required_libs = array('Dictionary', 'BaseUtilities', 'MySQL', 'Registry', 'System', 'UserAuthentication', 'UserInterface', 'Filesystem');
+foreach($required_libs as $lib) require_once sprintf('%s/Resources/Library/%s.php', $index_path, $lib);
+include EXPackage('System');
 
-# Load the request by $_GET request type
-if($_GET['reqType'] == 'direct') die(EXError(0));
-elseif($_GET['reqType'] == 'hidden') die(EXError(0));
-else { # Traditional Application request
+# Init system classes
+Registry::register('EX', new Elemental());
+Registry::register('UI', new UserInterface());
+Registry::register('UA', new UserAuthentication());
+Registry::register('DB', new MySQL()); # Hint: Support for non MySQL in the pipe
+
+# Setup App Load Environment
+$app_list = FSDirRead(root.'Applications/', true, lower_case_filename);
+$app_init = $app_list[Registery::fetch('EX')->app].'Init.php';
+$app_ref  = $app_list[Registery::fetch('EX')->app].'Resources.php';
+$app_app  = $app_list[Registery::fetch('EX')->app].'Application.php';
+
+# Application Load
+if (file_exists($app_init)) include $app_init;
+if (Registry::fetch('EX')->load_state == 'login') Registry::fetch('UI')->error("Please Login", EXFetchResource('login_page'));
+elseif (Registry::fetch('EX')->load_state == UAApplication) {
+	define('SELF', $app_path, true);
+	if(file_exists($app_ref)) include $app_ref;
+	if(file_exists($app_app)) include $app_app;
+	else {
+		$UI->Error('Invalid Application', 'That application is not valid. <a href="?app='.$EX->DefaultApp.'">Click Here</a> to go the home page.');
+		$UI->LoadOverride();
+	}
+} else if (Registry::fetch('EX')->load_state == override) $UI->loadOverride();
+
+# User Interface Load
+if (!Registry::fetch('UI')->direct_echo) {
+	$ui = rsc.'UI/'.$EX->UserInterface.'.ui/';
 	
-	# Set up the load vars
-	$app_id   = EXApp();
-	$app_list = FSDirRead(root.'Applications/', true, lower_case_filename);
-	$app_path = $app_list[$app_id];
-	$app_init = $app_path.'Init.php';
-	$app_ref  = $app_path.'Resources.php';
-	$app_app  = $app_path.'Application.php';
+	# Conf and Resources
+	if(file_exists($ui.'Conf.php')) include $ui.'Conf.php';
+	else include rsc.'UI/System.ui/Conf.php';
+	if(file_exists($ui.'Resources.php')) include $ui.'Resources.php';
 	
-	# Run the initialization and do UA checks
-	if($checks['init']) require $app_init;
-	if(UALoadState() == UALogin) include(EXLibrary('UALoginPage'));
-	elseif(UALoadState() == UAApplication) {
-		define('SELF', $app_path, true);
-		if(file_exists($app_ref)) require $app_ref;
-		require $app_app;
-		if(true) null; else UIError("Invalid Application", 'That application is not valid. <a href="?app='.EXDefaultApp().'">Click here</a> return home.');
-	} elseif(UALoadState() == override) {
-		$system['UI']['content'] = $system['override']['content'];
-		$system['UI']['sidebars'] = $system['override']['sidebars'];
-	} # Now to the UI
-	
-	if(!UIDirectEcho()) {
-		$ui = rsc.'UI/'.EXSystemUI().'.ui/';
-		if(file_exists($ui.'Conf.php')) require $ui.'Conf.php';
-		else { $ui = rsc.'UI/System.ui/'; require $ui.'Conf.php'; }
-		$interface = $ui.'Interface/' . UIInterface();
-		define('UI', 'Resources/UI/'.EXSystemUI().'.ui/', true);
-		if(file_exists($ui.'Resources.php')) include $ui.'Resources.php';
-		if(file_exists($interface)) require $interface;
-		else require $ui.'Interface/' . UIDefaultInterface();
-	} # Else do no UI management
-} # And done :P
+	# Interface
+	$interface = $ui.'Interface/'.$UI->Interface;
+	if(file_exists($interface)) require_once $interface;
+	else require $ui.'Interface/'.$UIConf['default-interface'];
+} # Else don't manage the UI

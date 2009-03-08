@@ -1,4 +1,4 @@
-<?php # Filesystem Library : Basic Actions
+<?php # Filesystem Library [ axiixc ] : Basic Actions
 
 # Directory Specific Functions
 function FSDirRead($path, $full=true, $keyformat=null, $post='/') {

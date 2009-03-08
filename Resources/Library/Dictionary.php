@@ -1,4 +1,4 @@
-<?php # Dictionary : System dictionary entries
+<?php # Dictionary [ axiixc ] : System definitions
 
 # System Version
 define('EXSystemVersion', 0.2);
@@ -29,25 +29,22 @@ define('year',    time()+31536000); # Est to 369 days per year (no leap year)
 define('destroy', time()-day);
 
 # System Extensions
-define('EXNullAsString', 'EXNullData');
-define('override',       'EXElementHasBeenOverriden', true);
-define('yes',            'yes', true);
-define('no',             'no', true);
-define('root',           EXScriptDir(), true);
-define('rsc',            root.'Resources/', true);
-define('lib',            rsc.'Library/', true);
-define('nil',            rsc.'nil', true);
+define('override', 'override', true);
+define('root',     $index_path, true);
+define('rsc',      root.'Resources/', true);
+define('lib',      rsc.'Library/', true);
+define('nil',      rsc.'nil', true);
 
 # Filesystem
-define('lower_case_filename', 'lower_case_filename');
-define('lower_case_basename', 'lower_case_basename');
-define('upper_case_filename', 'upper_case_filename');
-define('upper_case_basename', 'upper_case_basename');
-define('filename',            'filename');
-define('basename',            'basename');
-define('position_in_array',   'position_in_array');
-define('path',                'path');
-define('full_path',           'full_path');
+define('lc_filename', 'lc_filename');
+define('lc_basename', 'lc_basename');
+define('uc_filename', 'uc_filename');
+define('uc_basename', 'uc_basename');
+define('filename',    'filename');
+define('basename',    'basename');
+define('position',    'position');
+define('path',        'path');
+define('full_path',   'full_path');
 
 # Client Information
 define('client_ip', $_SERVER['REMOTE_ADDR']);
@@ -62,9 +59,6 @@ define('UALogin',       'UALogin');
 define('UAApplication', 'UAApplication');
 
 # Multilayer Data Storage [for storing multidimensional arrays in strings]
-define('MLDS1', '[%1%]'); define('MLDS2', '[%2%]'); define('MLDS3', '[%3%]');
-define('MLDS4', '[%4%]'); define('MLDS5', '[%5%]'); define('MLDS6', '[%6%]');
-define('MLDS7', '[%7%]'); define('MLDS8', '[%8%]'); define('MLDS9', '[%9%]');
 define('MLDF', '[%@%]');
 define('MLDS', '[%#%]');
 

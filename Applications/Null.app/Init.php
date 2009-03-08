@@ -1,1 +1,0 @@
-<?php # Null Init : Nothing to see here

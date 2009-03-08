@@ -7,26 +7,6 @@ function EXInString($pointer, $input, $case=false, $word=false) {
 	if(preg_match($match, $input)) return true; else return false;
 }
 
-#if(EXInString('hello', 'hellohowareyou', false, false))   echo 'pass'; else echo 'fail';
-#if(EXInString('hello', 'hellohowareyou', false, true))    echo 'fail'; else echo 'pass';
-#if(EXInString('hello', 'hello how are you', false, true)) echo 'pass'; else echo 'fail';
-#if(EXInString('hello', 'hEllohowareyou', true, false))    echo 'fail'; else echo 'pass';
-#if(EXInString('hello', 'hEllo how are you', true, true))  echo 'fail'; else echo 'pass';
-#if(EXInString('hEllo', 'hEllohowareyou', true, false))    echo 'pass'; else echo 'fail';
-#if(EXInString('hEllo', 'hEllohowareyou', true, true))     echo 'fail'; else echo 'pass';
-#if(EXInString('hEllo', 'hEllo how are you', true, true))  echo 'pass'; else echo 'fail';
-
-function EXPathSafe($path, $strict=false) {
-	if($strict) {
-		$path = preg_replace('/[.]{2,}/',null,$url);
-		$path = str_replace('/',null,$url);
-		return  str_replace('\\',null,$url);
-	} else {
-		$path = str_replace('/',null,$url);
-		return  str_replace('\\',null,$url);
-	}
-}	
-
 function EXHTMLSafe($str) {
 	$str = str_replace('<','&lt;',$str);
 	$str = str_replace('>','&gt;',$str);
@@ -66,49 +46,10 @@ function EXWordsSubStr($str_String, $int_Length) {
 	}
 } 
 
-# Fix or forget
-function EXConvertDate($date=null,$format=null) {
-	$months = array('01' => 'January', '02' => 'Feburary', '03' => 'March', '04' => 'April', 
-	'05' => 'May', '06' => 'June', '07' => 'July', '08' => 'August', '09' => 'September', 
-	'10' => 'October', '11' => 'November', '12' => 'December');
-	
-	if($date == null || $format == null) return FALSE;
-	else {
-		
-		$date = array(
-			'yearLong'         => substr($date,0,4),
-			'yearShort'        => substr($date,0,2),
-			
-			'monthNumWithZero' => substr($date,4,2),
-			'monthNum'         => substr($date,5,1),
-			'monthName'        => null,
-			
-			'dayNumWithZero'   => substr($date,6,2),
-			'dayNum'           => substr($date,7,1),
-			'dayName'          => null // Work in progress feature
-		);
-			
-		$date['monthName'] = $months[$date['monthNumWithZero']];	
-		
-		$key = array(
-			'yearLong'         => '%Y',
-			'yearShort'        => '%y',
-
-			'monthNumWithZero' => '%o',
-			'monthNum'         => '%m',
-			'monthName'        => '%M',
-			
-			'dayNumWithZero'   => '%a',
-			'dayNum'           => '%d',
-			'dayName'          => '%D'
-		);
-			
-		return str_replace($key,$date,$format);
-	}
-}
+function EXConvertDate() { /* Unsuported */ }
 
 function EXContentType($input) {
-	include(EXLibrary('Filetypes.php'));
+	$mime_types = EXFetchResources('mime_types');
 	list($dir, $base, $ext, $file) = pathinfo($input);
 	return isset($mime_types[$ext]) ? $mime_types[$ext] : 'application/octet-stream';
 }
