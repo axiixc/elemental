@@ -1,0 +1,82 @@
+ H                                                                                            He
+ Li Be              ELEMENTAL FRAMEWORK                                        B  C  N  O  F  Ne
+ Na Mg                version H  0003                                          Al Si P  S  Cl Ar
+ K  Ca                                           Sc Ti V  Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr
+ Rb Sr                                           Y  Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I  Xe
+ Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W  Re Os Ir Pt Au Hg Ti Pb Bi Po At Rd
+ Fr Ra Ac Th Pa U  Np Pu Am Cm Bk Cf Es Fm Md No Lr Uq Up Uh Us Uo Ue Un Ax Mr Du Da Tt
+
+ Written fully in PHP, Elemental EX provides the simplest get-going framework for web app
+ development. It takes the common tasks of application development, user management and UI and
+ does them for you, while leaving you enormous flexibility. 
+
+ EX uses a bundle bases management system, where all code is bundled by its function. Executed
+ code goes into application bundles and UI code goes into ui bundles. Everything is modular and
+ easy to as drag and drop to install.
+
+ Besides offering a expansive UI library, EX also makes data storage super easy with the Managed
+ Data Library, which interfaces with special database tables to automatically store, edit and
+ retrieve your data. These can be used with no SQL knowledge, however full MySQL access is still
+ available, and extended through the MySQL::query() method, which gives you special syntax such
+ as [prefix] and [database], as well as printf string support.
+
+ ==== Changelog ================================================================================
+
+ H  0000 - Initial version
+
+ H  0001 - Working version
+
+ H  0002 - Changed file structure
+         - Added User Authentication
+
+ H  0003 - Moved to OOP
+         - Cleaned up libraries and system loader
+
+ ==== Roadmap ==================================================================================
+ 
+ H  0004 - Working OOP code for all Libraries 
+
+ H  0005 - Documentation released
+         - Managed Data Library finished
+
+ H  0006 - All bundle specs done
+         - All method input and outputs set
+
+ H  0007 - Default Application bundles and Prefpage bundles done
+
+ H  0008 - Caching and Archive Support
+         - FTP or alternative large file upload system implemented and tested
+
+ H  0009 - Stable for testing
+         - Automagical Library included (BETA)
+
+ H  0010 - Final debug done and sent out for final test
+         - Release of the Automagical Library, it is now on by default
+
+ He 0011 - Release v1.0 [He 0011]
+
+ ==== Bugs and Patches =========================================================================
+
+ Submit any bugs or patches you create to GitHub if possible for the project Elemental
+ [http://github.com/axiixc/elemental/tree/master] or to axiixc[gmail]com
+
+ ==== License ==================================================================================
+
+ PHP web application development framework
+ Copyright (C) 2009 James Savage axiixc[gmail]com
+                    Anyone Else Who wants[to]help
+
+ This program is free software: you can redistribute it and/or modify it under the terms of the 
+ GNU General Public License as published by the Free Software Foundation, either version 3 of 
+ the License, or (at your option) any later version.
+
+ This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
+ without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
+ See the GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License along with this program.
+ If not, see <http://www.gnu.org/licenses/>.
+
+ This license applies to all files that came with this program. Names of specific authors of 
+ individual scripts can be found at the top of each scrip next to the script's name in square 
+ brackets ( eg [ axiixc : mrmonday ] )
