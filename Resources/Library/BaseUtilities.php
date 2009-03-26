@@ -17,6 +17,8 @@ function mysql_safe($str, $char="\\'\"") {
 	return $str;
 }
 
+function filename($str) { $nfo = pathinfo($str); return $nfo['filename']; }
+
 function fold($myarray,$EXFold_output=null,$EXFold_parentkey=null) {
 	foreach($myarray as $key=>$value){
 		if (is_array($value)) {

@@ -18,6 +18,15 @@ class Registry {
 		}
 	}
 	
+	public static function destroy($object_name) {
+		$object_name = strtolower($object_name);
+		if(isset(self::$objects[$object_name])) {
+			unset(self::$objects[$object_name]);
+		} else {
+			Log::write("Registry::destroy($object_name) Not an object.");
+		}
+	}
+	
 	public static function fetch($object_name) {
 		$object_name = strtolower($object_name);
 		if(isset(self::$objects[$object_name])) return self::$objects[$object_name];

@@ -2,7 +2,7 @@
 
 class System {
 	
-	public $app, $ui, $directecho;
+	public $app, $ui, $directecho, $override;
 	
 	public function __construct() {
 		# Application
@@ -10,7 +10,7 @@ class System {
 		else $this->app = Conf::read('Application');
 		
 		# UI
-		$this->ui = Conf::read('Default UI');
+		$this->ui = Conf::read('UI');
 	}
 	
 	public function directecho($x=null) {

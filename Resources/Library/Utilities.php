@@ -7,8 +7,6 @@ function in_string($pointer, $input, $case=false, $word=false) {
 	if(preg_match($match, $input)) return true; else return false;
 }
 
-function filename($str) { $nfo = pathinfo($str); return $nfo['filename']; }
-
 function wcsubstr($str_String, $int_Length) {
 	# (c) Ingo Renner (infoATingo-rennerDOTcom) www.ingo-renner.com 2003/01/18  
 	$str_String   = trim($str_String);

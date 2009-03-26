@@ -7,7 +7,10 @@ class Log {
 	private function __construct() {
 	}
 	
-	public static function write($string) {
+	public static function write() {
+		$args = func_get_args();
+		$string = array_shift($args);
+		if(count($args) > 0) $string = vsprintf($string, $args);
 		self::$log[] = time().'] '.$string;
 	}
 	

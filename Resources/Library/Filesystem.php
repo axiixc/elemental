@@ -17,7 +17,7 @@ function FSDirRead($path, $full=true, $keyformat=null, $post='/') {
 				elseif($keyformat == path) $key = $path;
 				elseif($keyformat == full_path) $key = $path . $file;
 				if(!$full) $output[$key] = $file . $post;
-				else $output[$key] = $path . $file . $post;
+				else $output[$key] = $path . '/' . $file . $post;
 			}
 		} return $output;
 	}
