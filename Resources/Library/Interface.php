@@ -40,9 +40,7 @@ class UserInterface {
 			Log::write("Load UI: User defined UI bundle could not be found. Defaulting to System bundle.");
 		}
 		include root.'Resources/UI/'.$this->ui.'/Conf.php';
-		# TEMP FIX 
-		if($_GET['fix_urls'] == 'yes') $this->path = "http://axiixcdev.co.cc:8008/Elemental/Resources/UI/$this->ui/";
-		else $this->path = Conf::read("WWW Path").'Resources/UI/'.$this->ui.'/';
+		$this->path = Conf::read("WWW Path").'Resources/UI/'.$this->ui.'/';
 		# END FIX
 		$this->default_interface = $this->interface = $this->interface_override = $Interface['default_interface'];
 		$this->login_window_interface = (isset($Interface['login_window'])) ? $Interface['login_window'] : '1Bar' ;
@@ -222,15 +220,27 @@ class UserInterface {
 			# Build the output
 			$output = $pre;
 			foreach($navigation as $link) {
-				if(substr($link['link'], 0, 5) == 'ex://') {
-					$lnk = substr($link['link'], 0, 5);
-					# Do `current` check here
-				} else {
-					$lnk = $link['link'];
-				} $output .= sprintf($item, $lnk, $link['name'], $current);
+				$lnk = $this->parse_link($link['link']);
+				$output .= sprintf($item, $lnk, $link['name'], $current);
 			} $output .= $post;
 			echo $output;
 		}
+	}
+	
+	/* Add file_exists() style link checking */
+	public function parse_link($link) {
+		if(substr($link, 0, 5) == 'ex://') {
+			if (preg_match("^ex://([0-9a-zA-Z]+)/([0-9a-zA-Z_./]+)^", $link, $bits) == 1) {
+				if($bits[1] == 'Interface') return $this->path.'Images/'.$bits[2];
+				elseif($bits[1] == 'Resources') return Conf::read("WWW Path").'Resources/'.$bits[2];
+				elseif($bits[1] == 'Application') return Conf::read("WWW Path").'Applications/'.$bits[2];
+				elseif($bits[1] == 'Media') return Conf::read("WWW Path").'Media/'.$bits[2];
+				elseif($bits[1] == 'Root') return Conf::read("WWW Path").$bits[2];
+				else return Conf::read("WWW Path").$bits[1].'/'.$bits[2];
+			} elseif(preg_match("^ex://([0-9a-zA-Z]+)([/]*)^", $link, $bits) == 1) {
+				return Conf::read("WWW Path").$bits[1];
+			}
+		} else return $link;
 	}
 	
 	/* Sidebars */

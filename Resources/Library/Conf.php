@@ -2,14 +2,14 @@
 
 class Conf {
 	
-	private static $conf = array();
-	private static $mysql = true;
+	public static $conf = array();
+	public static $mysql = true;
 	public static $update = false;
 	
 	private function __construct() {
 	}
 	
-	public static function preload($array=false) {
+	public static function awake($array=false) {
 		if($array !== false and is_array($array)) {
 			self::$conf = $array;
 		} else {
@@ -28,19 +28,19 @@ class Conf {
 		return array('conf' => self::$conf, 'mysql' => self::$mysql, 'update' => self::$update);
 	}
 	
-	public static function is_update() {
+	public static function sleep() {
 		if(self::$update) {
 			Cache::update("Conf");
 			Log::write("Conf::is_update(true) Cache updated.");
 		} else Log::write("Conf::is_update(false) Cache untouched.");
 	}
 	
-	public static function isset($key, $force_mysql=false) {
-		$key = crunch($key);
+	public static function is_set($key, $force_mysql=false) {
 		if(self::$mysql and !$force_mysql) {
+			
 			$result = MySQL::query("SELECT `value` FROM `[prefix]conf` WHERE `key` LIKE CONVERT(_utf8 '%s' USING latin1) COLLATE latin1_swedish_ci;", $key);
-			return (mysql_num_rows($result) == 1) ? false : true ;
-		} else return isset(self::$conf[$key]);
+			return (mysql_num_rows($result) == 1) ? true : false ;
+		} else  return (!is_null(self::$conf[$key])) ? true : false ;
 	}
 
 	public static function read($key, $force_mysql=false) {
@@ -85,7 +85,7 @@ class Conf {
 		self::$update = true;
 		if(is_array($value)) $value = '[ARRAY] '.fold($value);
 		if(!is_null($key)) {
-			if(self::isset($key, true)) { # Insert
+			if(self::is_set($key, true)) { # Insert
 				MySQL::query("INSERT INTO `[database]`.`[prefix]conf` (`key`, `value`, `name`, `show`) VALUES ('%s', '%s', '%s', '%s');", $key, $value, null, null);
 				if(!self::$mysql) self::$conf[$key] = $value;
 			} else { # Update
@@ -102,7 +102,7 @@ class Conf {
 		self::$update = true;
 		if(is_array($value)) $value = '[ARRAY] '.fold($value);
 		if(!is_null($key)) {
-			if(self::isset($key, true)) { # Insert
+			if(self::is_set($key, true)) { # Insert
 				MySQL::query("INSERT INTO `[database]`.`[prefix]conf` (`key`, `value`, `name`, `show`) VALUES ('%s', '%s', '%s', '%s');", $key, $value, $display, $show);
 				if(!self::$mysql) self::$conf[$key] = $value;
 			} else { # Update
@@ -117,7 +117,7 @@ class Conf {
 	public static function delete($key) {
 		$key = crunch($key);
 		self::$update = true;
-		if(!self::isset($key, true)) {
+		if(!self::is_set($key, true)) {
 			MySQL::query("DELETE FROM `[prefix]conf` WHERE CONVERT(`[prefix]conf`.`key` USING utf8) = '%s' LIMIT 1;", $key);
 			if(!self::$mysql) unset(self::$conf[$key]);
 		} else {

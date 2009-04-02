@@ -1,4 +1,7 @@
-<?php
+<?php # User Authentication [axiixc]
+
+/* Should load_login() be moved to here from Interface? */
+/* Add ability to move to selected page by http_reffere when logging in */
 
 class UserAuthentication {
 	
@@ -10,6 +13,7 @@ class UserAuthentication {
 		$this->limit = Conf::read("User Authentication Session Limit");
 		$this->action = 'Not Run';
 		$this->mode = 'Not Run';
+		$this->verification = true;
 	}
 	
 	public function awake() {
@@ -36,9 +40,13 @@ class UserAuthentication {
 			if($user and !$guest and $expire and $cookie and !$ban) { # Registered User
 				$this->action = 'Reload';
 				$this->load_session($user, $session);
-			} else if(!$user and $guest and $expire and $cookie and !$ban) { # Guest
+			} elseif(!$user and $guest and $expire and $cookie and !$ban) { # Guest
 				$this->action = 'Reload Guest';
 				$this->load_session('guest', $session);
+			} elseif($ban) {
+				$this->action = 'Deny';
+				$this->verification = false;
+				Registry::fetch('Interface')->error("Banned", "You have been banned from this site.");
 			} else { # Destroy and create anew
 				if(mysql_num_rows($session_result) > 0) MySQL::query("DELETE FROM `[prefix]sessions` WHERE CONVERT(`[prefix]sessions`.`id` USING utf8) = '%s' LIMIT 1", $sess_id);
 				setcookie('sess_id', null, destroy);
@@ -161,6 +169,7 @@ class UserAuthentication {
 	}
 	
 	public function require_type() {
+		if($this->type == UATypeAdmin) return true;
 		if($this->verification != false) {
 			$types = func_get_args();
 			foreach($types as $type) $switch = ($type == $this->type) ? true : false ;
@@ -178,6 +187,7 @@ class UserAuthentication {
 	}
 	
 	public function require_role() {
+		if($this->type == UATypeAdmin) return true;
 		if($this->verification != false) {
 			$roles = func_get_args();
 			foreach($roles as $role) $switch = (in_array($role, $this->roles)) ? true : false ;

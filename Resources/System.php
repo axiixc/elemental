@@ -2,7 +2,7 @@
 
 # Index check
 if(isset($index)) define('root', $index);
-else die('Index and Web Root not found.');
+else die('<b style="color:red">ERROR:</b> You must operate from the index file.');
 
 # Include the Library
 $required_libraries = array('Dictionary', 'Cache', 'Registry', 'System', 'Log', 'BaseUtilities', 'Filesystem', 'MySQL', 'Conf', 'Interface', 'UserAuthentication');
@@ -12,11 +12,12 @@ foreach($required_libraries as $library) require_once "Library/$library.php";
 include package('System');
 include package('Developers');
 
-# Cacheing and Preloading [beta]
+# Aweake Services
 if(Conf::read("Use Cache")) Cache::awake();
 if(Conf::read("Preload Conf"))
-	if(Cache::enabled()) Conf::preload(Cache::fetch("Conf"));
-	else Conf::preload();
+	if(Cache::enabled()) Conf::awake(Cache::fetch("Conf"));
+	else Conf::awake();
+if($_COOKIE['fix_urls'] == true) Conf::$conf['www-path'] = 'http://axiixcdev.co.cc:8008/Elemental/';
 
 # Register Objects
 Registry::register('System', new System);
@@ -41,14 +42,18 @@ if(file_exists($app_path.'Application.php')) {
 	Registry::fetch('Interface')->error("Application Not Found", "The application you tried to access does not exist. Recheck your URL or <a href=\"index.php\">click here</a> to go to the home page.");
 }
 
+# Sleep Services
+Conf::sleep();
+Cache::sleep();
+
+# Logs and Diagnostics
 if(Conf::read("Development Mode")) {
-	if($_GET['log'] == true) add('<code>'.Log::read().'</code>');
-	if($_GET['get'] == true) add('<code>'.print_r($_GET, true).'</code>');
-	if($_GET['diag'] == true) add('<code>'..'</code>')
+	if($_GET['log'] == 'true') add('<pre class="code">'.Log::read(true).'</pre>');
+	if($_GET['get'] == 'true') add('<pre class="code">'.print_r($_GET, true).'</pre>');
+	if($_GET['ui'] == 'true') add('<pre class="code">'.Registry::fetch('Interface')->diagnostics(true).'</pre>');
 }
 
-# Log via app
-if(Log::output()) add('<div class="log">'.Log::read(true).'</div>');
+if(Log::output()) add('<pre class="code">'.Log::read(true).'</pre>');
 
 # Load the UI
 if(!Registry::fetch("Interface")->direct_echo) {
