@@ -53,6 +53,20 @@ function is_odd($x) {
 	else return false;
 }
 
+function eoargs($array) {
+	if(is_even(count($array))) {
+		$i = 0;
+		do {
+			$a = $i; $b = $i + 1;
+			$x[crunch($array[$a])] = $array[$b];
+			$i = $i + 2;
+		} while($i <= count($array));
+		return $x;
+	} else {
+		Log::write("eoargs() Bad argument layout. Make sure argument count, including key, is an odd number.");
+	}
+}
+
 function diagnostic($output, $return=false) {
 	$colors = Conf::read("Diagnostic Styles");
 	foreach($output as $name => $value) {

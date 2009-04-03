@@ -2,8 +2,8 @@
 
 class Registry {
 	
-	public static $objects;
-	public static $environment;
+	public static $objects = array();
+	public static $environment = array();
 	
 	private function __construct() {}
 	
@@ -54,7 +54,7 @@ class Registry {
 			$output['Objects'] .= "$name ";
 		} foreach(self::$environment as $name => $value) {
 			$output['Environment'] .= "<br />  => <span style=\"color:#7096C2\">$name</span> : $value\n";
-		} diagnostics($output, $return);
+		} return diagnostic($output, $return);
 	}
 	
 }

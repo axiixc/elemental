@@ -5,12 +5,12 @@
 
 class UserAuthentication {
 	
-	public $conf, $uconf, $user, $role, $type, $guest;
-	private $session, $action, $mode, $limit, $application, $content, $verification, $roles;
+	public $conf=array(), $uconf=array(), $user=array(), $role, $type, $guest;
+	private $session, $action, $mode, $limit, $verification, $roles;
 	
 	public function __construct() {
 		$this->roles = import("User Roles");
-		$this->limit = Conf::read("User Authentication Session Limit");
+		$this->limit = constant(Conf::read("User Authentication Session Limit"));
 		$this->action = 'Not Run';
 		$this->mode = 'Not Run';
 		$this->verification = true;
@@ -62,7 +62,7 @@ class UserAuthentication {
 	
 	private function load_session($user, $session) {
 		if($user == 'guest') {
-			$this->conf = unfold($session['conf']);
+			$this->conf = unserialize($session['conf']);
 			$this->uconf = array();
 			$this->user = import('Guest User');
 			$this->role = 'guest';
@@ -71,8 +71,8 @@ class UserAuthentication {
 			$this->guest = true;
 			$this->action = 'Guest Reload';
 		} else {
-			$this->conf = unfold($session['conf']);
-			$this->uconf = unfold($user['conf']);
+			$this->conf = unserialize($session['conf']);
+			$this->uconf = unserialize($user['conf']);
 			$this->user = array(
 				'id' => $user['id'], 
 				'name' => $user['username'], 
@@ -90,7 +90,7 @@ class UserAuthentication {
 	}
 	
 	private function create_session() {
-		$limit = constant($this->limit);
+		$limit = $this->limit;
 		
 		if(isset($_POST['UAU']) and isset($_POST['UAP'])) {
 		/* REGISTERED SESSION CREATION */
@@ -105,7 +105,7 @@ class UserAuthentication {
 				
 				$session = $this->generate_keys(uniqid(), $user['username'], $password);
 				$this->conf = import("Default User Conf");
-				$this->uconf = unfold($user['conf']);
+				$this->uconf = unserialize($user['conf']);
 				$this->user = array(
 					'id' => $user['id'], 
 					'name' => $user['username'], 
@@ -140,6 +140,30 @@ class UserAuthentication {
 			setcookie('sess_verify', $session['verify'], $limit);
 			MySQL::query("INSERT INTO `[database]`.`[prefix]sessions` (`id`, `key`, `user`, `conf`, `expire`, `guest`) VALUES ('%s', '%s', '%s', '%s', '%s', %s);", $session['id'], $session['key'], client_ip, $this->conf, $limit, '1');
 		}
+		
+	}
+	
+	public function read($key) {
+		
+	}
+	
+	public function write($key, $value) {
+		
+	}
+	
+	public function delete($key) {
+		
+	}
+	
+	public function uread($key) {
+		
+	}
+	
+	public function uwrite($key, $value) {
+		
+	}
+	
+	public function udelete($key) {
 		
 	}
 	
@@ -222,6 +246,24 @@ class UserAuthentication {
 	
 	private function killSession() {
 		Registry::fetch('System')->end("Force Kill");
+	}
+
+	public function diagnostics($return=false) {
+		if(is_null($this->conf) or count($this->conf) == 0) $output['session-config'] = null;
+		else $output['session-config'] = print_r($this->conf, true);
+		if(is_null($this->uconf) or count($this->uconf) == 0) $output['user-config'] = null;
+		else $output['user-config'] = print_r($this->uconf, true);
+		$output['user-information'] = print_r($this->user, true);
+		$output['role'] = $this->role;
+		$output['type'] = $this->type;
+		$output['guest-user'] = $this->guest;
+		$output['session-id'] = $this->session;
+		$output['load-action'] = $this->action;
+		$output['load-mode'] = $this->mode;
+		$output['session-time-limit'] = uncrunch(Conf::read("User Authentication Session Limit")).' or until '.$this->limit;
+		$output['verification'] = $this->verification;
+		$output['roles'] = print_r($this->roles, true);
+		return diagnostic($output, $return);
 	}
 	
 }

@@ -6,8 +6,7 @@ class Conf {
 	public static $mysql = true;
 	public static $update = false;
 	
-	private function __construct() {
-	}
+	private function __construct() {}
 	
 	public static function awake($array=false) {
 		if($array !== false and is_array($array)) {
