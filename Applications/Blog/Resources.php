@@ -4,4 +4,6 @@ class Blog {
 	
 	public function __construct() {}
 	
+	
+	
 }

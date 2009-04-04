@@ -68,15 +68,14 @@ function eoargs($array) {
 }
 
 function diagnostic($output, $return=false) {
-	$colors = Conf::read("Diagnostic Styles");
 	foreach($output as $name => $value) {
 		if(is_null($value)) $value = 'NULL';
 		if($value === true) $value = 'TRUE';
 		if($value === false) $value = 'FALSE';
-		$value = str_replace('NULL', '<span style="color:yellow">NULL</span>', $value);
-		$value = str_replace('TRUE', '<span style="color:green">TRUE</span>', $value);
-		$value = str_replace('FALSE', '<span style="color:red">FALSE</span>', $value);
-		$x .= sprintf('<span style="color:#2C68C1;">[%s]</span>&nbsp;%s<br />', uncrunch($name), $value);
+		$value = str_replace('NULL', Registry::fetch('Interface')->template('Diagnostic NULL'), $value);
+		$value = str_replace('TRUE', Registry::fetch('Interface')->template('Diagnostic NULL'), $value);
+		$value = str_replace('FALSE', Registry::fetch('Interface')->template('Diagnostic NULL'), $value);
+		$x .= sprintf(Registry::fetch('Interface')->template('Diagnostic Item'), uncrunch($name), $value);
 	}
 	if($return) return $x; else { echo $x; return null; }
 }

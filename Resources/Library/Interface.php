@@ -1,7 +1,5 @@
 <?php # User Interface Management [axiixc]
 
-## OMG NO OVERRIDE SUPPORT WTF ADD IT YOU IDIOT
-
 class UserInterface {
 	
 	/* Variable Hell */
