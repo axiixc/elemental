@@ -33,7 +33,7 @@ class Registry {
 	}
 	
 	public static function write($name, $value) {
-		$name = crunch($object_name);
+		$name = crunch($name);
 		self::$environment[$name] = $value;
 	}
 	
@@ -51,9 +51,11 @@ class Registry {
 	
 	public static function diagnostics($return=false) {
 		foreach(self::$objects as $name => $foo) {
+			$name = uncrunch($name);
 			$output['Objects'] .= "$name ";
 		} foreach(self::$environment as $name => $value) {
-			$output['Environment'] .= "<br />  => <span style=\"color:#7096C2\">$name</span> : $value\n";
+			$name = uncrunch($name);
+			$output['Environment'] .= "<br />  => <span style=\"color:#7096C2\">$name</span> : $value";
 		} return diagnostic($output, $return);
 	}
 	

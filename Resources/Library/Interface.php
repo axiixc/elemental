@@ -344,10 +344,10 @@ class UserInterface {
 	/* Debug */
 	public function diagnostics($return=false) {
 		# $content;
-		if(!is_null($this->content)) $output['content'] = strlen($this->content)." Characters";
+		if(!is_null($this->content)) $output['content'] = strlen($this->content)." Characters.";
 		else $output['content'] = "NULL";
 		# $content_override;
-		if(!is_null($this->content_override)) $output['content-override'] = strlen($this->content_override)." Characters<br />\n".$this->content_override;
+		if(!is_null($this->content_override)) $output['content-override'] = strlen($this->content_override)." Characters<br />";
 		else $output['content_override'] = "NULL";
 		# $interface_keys = array();
 		foreach($this->interface_keys as $key => $file) {
@@ -397,6 +397,15 @@ class UserInterface {
 			if(file_exists($path)) $icon = "TRUE ".$path;
 			else $icon = false;
 		} $output['apple-icon'] = $icon;
+		# CSS
+		$iPath = root."Resources/UI/{$this->ui}/Style/";
+		$path = $this->path."Style/";
+		if(file_exists($iPath."Base.css"))  $output['base-stylesheet'] = $path."Base.css";
+		elseif(file_exists($iPath."Base.php")) $output['base-stylesheet'] = $path."Base.php";
+		if($this->override) $interface = $this->interface_override; else $interface = $this->interface;
+		if(file_exists($iPath.$this->interface.".css")) $output['interface-stylesheet'] = $path.$interface.".css";
+		elseif(file_exists($iPath.$this->interface.".php")) $output['interface-stylesheet'] = $path.$interface.".php";
+		else $output['interface-stylesheet'] = null;
 		# $override = false;
 		$output['override'] = $this->override;
 		# $direct_echo = false;
@@ -410,14 +419,14 @@ class UserInterface {
 		else $output['javascript-body'] = null;
 		# javascript[include_head]
 		if(count($this->javascript['include_head']) > 0) {
-			$output['javascript-include-head'] = count($this->javascript['include_head'])." Items<br />\n";
+			$output['javascript-include-head'] = count($this->javascript['include_head'])." Items<br />";
 			foreach($this->javascript['include_head'] as $item) {
 				$output['javascript-include-head'] .= $item;
 			}
 		} else $output['javascript-include-head'] = null;
 		# javascript[include_body]
 		if(count($this->javascript['include_body']) > 0) {
-			$output['javascript-include-body'] = count($this->javascript['include_body'])." Items<br />\n";
+			$output['javascript-include-body'] = count($this->javascript['include_body'])." Items<br />";
 			foreach($this->javascript['include_body'] as $item) {
 				$output['javascript-include-body'] .= $item;
 			}
@@ -425,14 +434,14 @@ class UserInterface {
 		# $notifications = array();
 		# notifications[UIError]
 		if(count($this->notifications[UIError]) > 0) {
-			$output['notification-errors'] = count($this->notifications[UIError])." Errors<br />\n";
+			$output['notification-errors'] = count($this->notifications[UIError])." Errors<br />";
 			foreach($this->notifications[UIError] as $item) {
 				$output['notification-errors'] .= $item;
 			}
 		} else $output['notification-errors'] = null;
 		# notifications[UINotice]
 		if(count($this->notifications[UINotice]) > 0) {
-			$output['notification-notices'] = count($this->notifications[UINotice])." Notices<br />\n";
+			$output['notification-notices'] = count($this->notifications[UINotice])." Notices<br />";
 			foreach($this->notifications[UINotice] as $item) {
 				$output['notification-notices'] .= $item;
 			}
@@ -442,9 +451,10 @@ class UserInterface {
 		$output['sidebar-counter'] = $this->sidebar_counter;
 		if(count($this->sidebars) > 0)
 		foreach($this->sidebars as $id => $bar) {
-			$output['sidebar-'.$id] = "<span style=\"color:#46A4FA;\">[{$bar['title']}]</span><br />\n{$bar['content']}";
+			$output['sidebar-'.$id] = "<span style=\"color:#46A4FA;\">[{$bar['title']}]</span><br />{$bar['content']}";
 		}
 		
+		# Return or Echo
 		return diagnostic($output, $return);
 	}
 	

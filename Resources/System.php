@@ -17,7 +17,7 @@ if(Conf::read("Use Cache")) Cache::awake();
 if(Conf::read("Preload Conf"))
 	if(Cache::enabled()) Conf::awake(Cache::fetch("Conf"));
 	else Conf::awake();
-if($_COOKIE['fix_urls'] == true) Conf::$conf['www-path'] = 'http://axiixcdev.co.cc:8008/Elemental/';
+if(client_ip == '::1') Conf::$conf['www-path'] = 'http://localhost/Elemental/';
 
 # Register Objects
 Registry::register('System', new System);
@@ -52,6 +52,7 @@ Cache::sleep();
 
 # Logs and Diagnostics
 if(Conf::read("Development Mode")) {
+	if($_GET['clear'] == 'true') Registry::fetch('Interface')->content = null;
 	if($_GET['log'] == 'true') add('<pre class="code">'.Log::read(true).'</pre>');
 	if($_GET['get'] == 'true') add('<pre class="code">'.print_r($_GET, true).'</pre>');
 	if($_GET['reg'] == 'true') add('<pre class="code">'.Registry::diagnostics(true).'</pre>');

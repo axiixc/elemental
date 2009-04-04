@@ -35,12 +35,12 @@ function unfold($string) {
 
 /* This String To -> this-string-to */
 function crunch($string) {
-	return str_replace(' ', '-', strtolower($string));
+	return str_replace(' ', '-', str_replace('_', '-', strtolower($string)));
 }
 
 /* this-string-to -> This String To */
-function uncrunch($string) {
-	return ucwords(str_replace('-', ' ', $string));
+function uncrunch($string, $expand_to=' ') {
+	return ucwords(str_replace('-', $expand_to, $string));
 }
 
 function is_even($x) {
