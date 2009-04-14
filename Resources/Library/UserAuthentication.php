@@ -1,12 +1,11 @@
 <?php # User Authentication [axiixc]
 
-/* Should load_login() be moved to here from Interface? */
-/* Add ability to move to selected page by http_reffere when logging in */
+/* Add ability to move to selected page by http_reffer when logging in */
 
 class UserAuthentication {
 	
-	public $conf=array(), $uconf=array(), $user=array(), $role, $type, $guest;
-	private $session, $action, $mode, $limit, $verification, $roles;
+	public $conf=array(), $uconf=array(), $user=array(), $role, $type, $guest, $login, $verification;
+	private $session, $action, $mode, $limit, $roles;
 	
 	public function __construct() {
 		$this->roles = import("User Roles");
@@ -14,40 +13,50 @@ class UserAuthentication {
 		$this->action = 'Not Run';
 		$this->mode = 'Not Run';
 		$this->verification = true;
+		$this->login = false;
 	}
 	
 	public function awake() {
-		if(!is_null($_COOKIE['sess_id'])) {
+		Log::write('AWAKE');
+		if(!is_null($_COOKIE['sess_id']) and !isset($_POST['UAU'])) {
+			Log::write('sess_id is not null');
 			$session_id = mysql_safe($_COOKIE['sess_id']);
 			$session_result = MySQL::query("SELECT * FROM `[prefix]sessions` WHERE `id` = CONVERT(_utf8 '%s' USING latin1) COLLATE latin1_swedish_ci", $session_id);
 			$session = mysql_fetch_assoc($session_result);
 			$user_result = MySQL::query("SELECT * FROM `[prefix]users` WHERE `username` = CONVERT(_utf8 '%s' USING latin1) COLLATE latin1_swedish_ci", $session['user']);
-			$user = mysql_fetch_assoc($user_result);
+			$user_data = mysql_fetch_assoc($user_result);
 			
 			# Run checks [ can this be condensed ? ]
-			$user = (mysql_num_rows($user_result)) ? true : false ;
+			$user = (mysql_num_rows($user_result) == 1) ? true : false ;
 			$guest = ($session['guest'] == 1) ? true : false ;
 			$expire = ($session['expire'] > time()) ? true : false ;
-			if($guest) {
+			if($guest) { # Cookie for GUEST
 				$cookie = $this->validate_keys($session['key'], $_COOKIE['sess_id'], $_COOKIE['sess_verify'], null, null);
-				$cookie = ($_COOKIE['sess_verify'] == md5($session['key'].client_ip)) ? true : false ;
 				$ban = (in_array($session['user'], import('Banned IPs'))) ? true : false ;
-			} else {
-				$cookie = $this->validate_keys($session['key'], $_COOKIE['sess_id'], $_COOKIE['sess_verify'], $user['usename'], $user['password']);
-				$ban = ($user['type'] == UATypeBan) ? true : false ;
+			} else { # Cookie for REGISTERED USER
+				$cookie = $this->validate_keys($session['key'], $_COOKIE['sess_id'], $_COOKIE['sess_verify'], $user_data['usename'], $user_data['password']);
+				$ban = ($user_data['type'] == UATypeBan) ? true : false ;
 			}
 			
+			Log::write('CREDS: '.$user_data['username'].$user_data['password']);
+			
+			Log::write("USER: $user, GUEST: $guest, EXPIRE: $expire, COOKIE: $cookie, BAN: $ban");
+			
 			if($user and !$guest and $expire and $cookie and !$ban) { # Registered User
+				Log::write('Found to be Normal Reload');
 				$this->action = 'Reload';
-				$this->load_session($user, $session);
+				$this->load_session($user_data, $session);
 			} elseif(!$user and $guest and $expire and $cookie and !$ban) { # Guest
+				Log::write('Found to be Guest Reload');
 				$this->action = 'Reload Guest';
 				$this->load_session('guest', $session);
 			} elseif($ban) {
+				Log::write('Found to be banned');
 				$this->action = 'Deny';
 				$this->verification = false;
 				Registry::fetch('Interface')->error("Banned", "You have been banned from this site.");
 			} else { # Destroy and create anew
+				Log::write('Found to be Destroy');
 				if(mysql_num_rows($session_result) > 0) MySQL::query("DELETE FROM `[prefix]sessions` WHERE CONVERT(`[prefix]sessions`.`id` USING utf8) = '%s' LIMIT 1", $sess_id);
 				setcookie('sess_id', null, destroy);
 				setcookie('sess_verify', null, destroy);
@@ -55,13 +64,22 @@ class UserAuthentication {
 				$this->create_session();
 			}
 		} else {
+			Log::write('sess_id is null');
 			$this->action = 'No Cookie';
 			$this->create_session();
 		}
 	}
 	
+	public function test_login() {
+		Log::write('Test Login');
+		$this->action = 'Testing Login';
+		$this->create_session();
+	}
+	
 	private function load_session($user, $session) {
+		Log::write('load_session invoked');
 		if($user == 'guest') {
+			Log::write("LOAD SESSION: GUEST");
 			$this->conf = unserialize($session['conf']);
 			$this->uconf = array();
 			$this->user = import('Guest User');
@@ -71,12 +89,13 @@ class UserAuthentication {
 			$this->guest = true;
 			$this->action = 'Guest Reload';
 		} else {
+			Log::write("LOAD SESSION: USER");
 			$this->conf = unserialize($session['conf']);
 			$this->uconf = unserialize($user['conf']);
 			$this->user = array(
 				'id' => $user['id'], 
 				'name' => $user['username'], 
-				'display-name' => $user['display-name'], 
+				'display-name' => $user['dname'], 
 				'first-name' => $user['fname'],
 				'middle-name' => $user['mname'], 
 				'last-name' => $user['lname'], 
@@ -86,14 +105,22 @@ class UserAuthentication {
 			$this->session = $session['id'];
 			$this->guest = false;
 			$this->action = 'Reload';
+			$this->login = true;
 		}
 	}
 	
 	private function create_session() {
+		Log::write('create_session invoked');
+		
 		$limit = $this->limit;
+		$do_guest = true;
+		
+		if($this->action == 'Not Run') return false;
+		Log::write('OK guess we keep going');
 		
 		if(isset($_POST['UAU']) and isset($_POST['UAP'])) {
 		/* REGISTERED SESSION CREATION */
+			Log::write('Registered session creation, maybe');
 		
 			# Generate Validation Info
 			$username = mysql_safe($_POST['UAU']);
@@ -102,14 +129,15 @@ class UserAuthentication {
 			
 			// Reload
 			if($password == $user['password']) {
+				Log::write('RSC yup');
 				
-				$session = $this->generate_keys(uniqid(), $user['username'], $password);
+				$session = $this->generate_keys(x, $user['username'], $user['password']);
 				$this->conf = import("Default User Conf");
 				$this->uconf = unserialize($user['conf']);
 				$this->user = array(
 					'id' => $user['id'], 
 					'name' => $user['username'], 
-					'display-name' => $user['display-name'], 
+					'display-name' => $user['dname'], 
 					'first-name' => $user['fname'],
 					'middle-name' => $user['mname'], 
 					'last-name' => $user['lname'], 
@@ -117,17 +145,30 @@ class UserAuthentication {
 				$this->role = $user['role'];
 				$this->type = $user['type'];
 				$this->session = $session['id'];
+				$this->guest = false;
 				$this->mode = 'New';
+				$this->login = true;
 				
 				setcookie('sess_id', $session['id'], $limit);
 				setcookie('sess_verify', $session['verify'], $limit);
 				MySQL::query("INSERT INTO `[database]`.`[prefix]sessions` (`id`, `key`, `user`, `conf`, `expire`, `guest`) VALUES ('%s', '%s', '%s', '%s', '%s', %s);", $session['id'], $session['key'], $user['username'], $this->conf, $limit, '0');
 				
-			} //--> END RELOAD
+				Log::write("KEY: {$session['key']}");
+				Log::write("ID: {$session['id']}");
+				Log::write("ID: {$_COOKIE['sess_id']}");
+				Log::write("VERIFY: {$session['verify']}");
+				Log::write("VERIFY: {$_COOKIE['sess_verify']}");
+				Log::write('CREDS: '.$user['username'].$user['password']);
+				$do_guest = false;
+			}
 			
-		} else {
+		}
+		
+		if($do_guest) {
 		/* GUEST SESSION CREATION */
-			$session = $this->generate_keys(uniqid(), null, null);
+		
+			Log::write('Guest session creation');
+			$session = $this->generate_keys(x, null, null);
 			$this->conf = import("Guest Conf");
 			$this->uconf = array();
 			$this->user = import("Guest User");
@@ -139,6 +180,12 @@ class UserAuthentication {
 			setcookie('sess_id', $session['id'], $limit);
 			setcookie('sess_verify', $session['verify'], $limit);
 			MySQL::query("INSERT INTO `[database]`.`[prefix]sessions` (`id`, `key`, `user`, `conf`, `expire`, `guest`) VALUES ('%s', '%s', '%s', '%s', '%s', %s);", $session['id'], $session['key'], client_ip, $this->conf, $limit, '1');
+			
+			Log::write("KEY: {$session['key']}");
+			Log::write("ID: {$session['id']}");
+			Log::write("ID: {$_COOKIE['sess_id']}");
+			Log::write("VERIFY: {$session['verify']}");
+			Log::write("VERIFY: {$_COOKIE['sess_verify']}");
 		}
 		
 	}
@@ -168,23 +215,29 @@ class UserAuthentication {
 	}
 	
 	private function generate_keys($auth_token, $username, $password) {
-		$sess['key'] = md5(uniqid());
+		$sess['key'] = md5($auth_token);
+		Log::write("KEY {$sess['key']}");
 		$sess['id'] = md5($sess['key']);
+		Log::write("ID: {$sess['id']}");
 		$sess['verify'] = md5($sess['key'].$username.$password.client_ip);
+		Log::write("VERIFY {$sess['verify']}");
 		return $sess;
 	}
 	
 	private function validate_keys($key, $rSess_id, $rSess_verify, $username, $password) {
+		Log::write("VKEY {$key}");
 		$sess['id'] = md5($key);
+		Log::write("VID {$sess['id']}");
 		$sess['verify'] = md5($key.$username.$password.client_ip);
+		Log::write("VVERIFY {$sess['verify']}");
 		if($sess['id'] == $rSess_id and $sess['verify'] == $rSess_verify) return true;
 		else return false;
 	}
 	
 	public function integrity() {
-		$gen = $this->generate_keys(uniqid(), foo, bar);
-		if($this->validate_keys($gen['key'], $gen['id'], $gen['verify'], foo, bar)) Log::write('User Authentication Session Integrity: Pass');
-		else Log::write('User Authentication Session Integrity: Fail');
+		$gen = $this->generate_keys(x, 'foo', 'bar');
+		if($this->validate_keys($gen['key'], $gen['id'], $gen['verify'], 'foo', 'bar')) return true;
+		else return false;
 	}
 	
 	public function log_msgs() {
@@ -249,6 +302,8 @@ class UserAuthentication {
 	}
 
 	public function diagnostics($return=false) {
+		$output['cookie-session-id'] = $_COOKIE['sess_id'];
+		$output['cookie-session-verifiy'] = $_COOKIE['sess_verify'];
 		if(is_null($this->conf) or count($this->conf) == 0) $output['session-config'] = null;
 		else $output['session-config'] = print_r($this->conf, true);
 		if(is_null($this->uconf) or count($this->uconf) == 0) $output['user-config'] = null;
@@ -257,12 +312,14 @@ class UserAuthentication {
 		$output['role'] = $this->role;
 		$output['type'] = $this->type;
 		$output['guest-user'] = $this->guest;
+		$output['is-logged-in'] = $this->login;
 		$output['session-id'] = $this->session;
 		$output['load-action'] = $this->action;
 		$output['load-mode'] = $this->mode;
 		$output['session-time-limit'] = uncrunch(Conf::read("User Authentication Session Limit")).' or until '.$this->limit;
 		$output['verification'] = $this->verification;
 		$output['roles'] = print_r($this->roles, true);
+		$output['key-test'] = $this->integrity();
 		return diagnostic($output, $return);
 	}
 	

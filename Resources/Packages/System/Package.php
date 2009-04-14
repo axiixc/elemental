@@ -25,3 +25,9 @@ function register_resource($id, $contents) {
 	FSWrite(sprintf('%s/Resources/%s.php', dirname(__FILE__), $use_id), $write);
 	unset ($template, $resource_type, $resource, $use_id);
 }
+
+function append_resource($id, $contents) {
+	$temp = import($id);
+	$temp[] = $contents;
+	register_resource($id, $temp);
+}

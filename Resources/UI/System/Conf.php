@@ -4,11 +4,12 @@
 $Interface = array();
 $Interface['default_interface'] = '2Bar';
 $Interface['interface_keys'] = array(
+	'Box' => '1Bar.php',
 	'3Bar' => '2Bar.php',
 	'iPhone' => '2Bar.php',
 	'Mobile' => '2Bar.php',
 	'Print' => '2Bar.php' );
-$Interface['login_window'] = '1Bar';
+$Interface['login_window'] = 'Box';
 
 /* Info */
 $interface = array(

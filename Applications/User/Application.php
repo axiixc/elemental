@@ -1,2 +1,0 @@
-<?php # User Manager [axiixc]
-

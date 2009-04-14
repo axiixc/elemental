@@ -24,9 +24,13 @@ define('path',        'path');
 define('full_path',   'full_path');
 
 # Date
-define('EXDateSDF_Day', 'Ymd');
-define('EXDateSDF_Hour', 'YmdH');
-define('EXDateSDF_Minute', 'YmdHi');
+define('EXDateSDF_Day', 'Ymd'); # DEPRICATED
+define('EXDateSDF_Hour', 'YmdH'); # DEPRICATED
+define('EXDateSDF_Minute', 'YmdHi'); # DEPRICATED
+define('DateSDF_YMD', EXDateSDF_Day);
+define('DateSDF_YMDH', EXDateSDF_Hour);
+define('DateSDF_YMDHM', EXDateSDF_Minute);
+
 
 # Time Shortcuts
 define('second',  time()+1);

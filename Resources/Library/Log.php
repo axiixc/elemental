@@ -3,19 +3,25 @@
 class Log {
 	
 	private static $log = array();
+	private static $perm_log = array();
 	private static $output = false;
 	
-	private function __construct() {
-	}
+	private function __construct() {}
 	
 	public static function write() {
 		$args = func_get_args();
 		$string = array_shift($args);
+		if($string === false) {
+			$string = array_shift($args);
+			if(count($args) > 0) $string = vsprintf($string, $args);
+			self::$perm_log[] = array('time' => time(), 'message' => $string);
+		}
 		if(count($args) > 0) $string = vsprintf($string, $args);
 		self::$log[] = array('time' => time(), 'message' => $string);
 	}
 	
 	public static function read($return=false, $array=false) {
+		self::write("Log Close: ".time());
 		$master = Registry::fetch("Interface")->template("Log");
 		$template = Registry::fetch("Interface")->template("Log Message");
 		if(count(self::$log) > 0) {
@@ -42,4 +48,13 @@ class Log {
 		} # No else output (for obvious reasons :P)
 	}
 	
+	public static function sleep() {
+		if(count(self::$perm_log) > 0) {
+			$ip = client_ip;
+			foreach(self::$perm_log as $item) append_resource("Permanent Log", "[{$item['time']}:$ip] {$item['message']}");
+		}
+	}
+	
 }
+
+Log::write("Log Start: ".time());

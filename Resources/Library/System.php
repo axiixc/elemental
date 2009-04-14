@@ -27,6 +27,7 @@ class System {
 }
 
 function package($id) {
+	$id = crunch($id);
 	if(file_exists(root."Resources/Packages/$id/Package.php")) {
 		return root."Resources/Packages/$id/Package.php";
 	} else if(file_exists(root."Packages/$id")) {
@@ -39,10 +40,22 @@ function package($id) {
 }
 
 function library($id) {
+	$id = crunch($id);
 	if(file_exists(root."Resources/Library/$id.php")) {
 		return root."Resources/Library/$id.php";
 	} else {
 		Log::write("library($id) Library does not exist.");
+		return nil;
+	}
+}
+
+function application($id) {
+	$id = crunch($id);
+	if(file_exists(root."Applications/$id/Resources.php")) {
+		return root."Applications/$id/Resources.php";
+	} else {
+		if(file_exists(root."Applications/$id")) Log::write("application($id) Application does not exist.");
+		elseif(file_exists(root."Applications/$id/Resources.php")) Log::write("application($id) Application does not contain a resource file.");
 		return nil;
 	}
 }

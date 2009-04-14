@@ -27,6 +27,8 @@ class UserInterface {
 	public $javascript = array();
 	public $notifications = array();
 	public $sidebars = array();
+	public $templates = array();
+	public $system_templates = array();
 	
 	public function __construct($ui=null) {
 		# Check for UI Init type
@@ -54,6 +56,13 @@ class UserInterface {
 		# Convert $_GET vars to notices/errors
 		if(isset($_GET['error'])) foreach(explode('[%@%]', $_GET['error']) as $msg) $this->notification(UIError, $msg);
 		if(isset($_GET['notice'])) foreach(explode('[%@%]', $_GET['notice']) as $msg) $this->notification(UINotice, $msg);
+		# Load Templates
+		include(root.'Resources/UI/System/Templates.php');
+		$this->system_templates = $templates;
+		if(file_exists(root.'Resources/UI/'.$this->ui.'/Templates.php')) {
+			include root.'Resources/UI/'.$this->ui.'/Templates.php';
+			$this->templates = $templates;
+		}
 	}
 	
 	/* Meta */
@@ -182,11 +191,12 @@ class UserInterface {
 	public function error($title, $message) {
 		$this->override = true;
 		$this->interface_override = 'Box';
+		#if(preg_match('^"ex://([0-9a-zA-Z/-_]+)"^')) preg_replace('^"ex://([0-9a-zA-Z/-_]+)"^', $this->parse_link($))
 		$this->content_override = sprintf($this->template("Notification Error"), $title, $message);
 	}
 	
 	/* Menus */
-	public function menu($input, $pre=null, $item=null, $post=null) {
+	public function menu($input, $pre=null, $item=null, $post=null, $pre2=null) {
 		if(is_string($input)) { # Fetch menu by name
 			$input = crunch($input);
 			$result = MySQL::query("SELECT *  FROM `[prefix]menus` WHERE `name` = CONVERT(_utf8 '%s' USING latin1) COLLATE latin1_swedish_ci", $input);
@@ -210,7 +220,26 @@ class UserInterface {
 		} # $navigation now complete
 		
 		if($pre === true) { # Return
-			return array('menu' => $menu, 'navigation' => $navigation);
+			if(is_null($pre2)) $pre = $this->template("Menu Pre");
+			if(is_null($item)) $item = $this->template("Menu Item");
+			if(is_null($post)) $post = $this->template("Menu Post");
+			# Build the output
+			$output = $pre;
+			foreach($navigation as $link) {
+				if($link['name'] == 'SESSION_LOGINOUT' and $link['link'] == 'SESSION_LOGINOUT') {
+					if(Registry::fetch('UAuth')->login == true) {
+						$link['name'] = 'Logout';
+						$link['link'] = 'ex://Users/Login';
+					} else {
+						$link['name'] = 'Login';
+						$link['link'] = 'ex://Users/Login';
+					}
+				}
+				$lnk = $this->parse_link($link['link']);
+				# Sense for CURRENT goes here
+				$output .= sprintf($item, $lnk, $link['name'], $current);
+			} $output .= $post;
+			return $output;
 		} else { # Echo
 			if(is_null($pre)) $pre = $this->template("Menu Pre");
 			if(is_null($item)) $item = $this->template("Menu Item");
@@ -218,68 +247,83 @@ class UserInterface {
 			# Build the output
 			$output = $pre;
 			foreach($navigation as $link) {
+				if($link['name'] == 'SESSION_LOGINOUT' and $link['link'] == 'SESSION_LOGINOUT') {
+					if(Registry::fetch('UAuth')->login == true) {
+						$link['name'] = 'Logout';
+						$link['link'] = 'ex://Users/Login';
+					} else {
+						$link['name'] = 'Login';
+						$link['link'] = 'ex://Users/Login';
+					}
+				}
 				$lnk = $this->parse_link($link['link']);
+				# Sense for CURRENT goes here
 				$output .= sprintf($item, $lnk, $link['name'], $current);
 			} $output .= $post;
 			echo $output;
 		}
 	}
 	
-	/* Add file_exists() style link checking */
+	/* TODO: Add file_exists() style link checking */
 	public function parse_link($link) {
 		if(substr($link, 0, 5) == 'ex://') {
-			if (preg_match("^ex://([0-9a-zA-Z]+)/([0-9a-zA-Z_./]+)^", $link, $bits) == 1) {
-				if($bits[1] == 'Interface') return $this->path.'Images/'.$bits[2];
-				elseif($bits[1] == 'Resources') return Conf::read("WWW Path").'Resources/'.$bits[2];
-				elseif($bits[1] == 'Application') return Conf::read("WWW Path").'Applications/'.$bits[2];
-				elseif($bits[1] == 'Media') return Conf::read("WWW Path").'Media/'.$bits[2];
-				elseif($bits[1] == 'Root') return Conf::read("WWW Path").$bits[2];
-				else return Conf::read("WWW Path").$bits[1].'/'.$bits[2];
+			if (preg_match("^ex://([0-9a-zA-Z]+)/([0-9a-zA-Z_./]+)([0-9a-zA-Z_./?&=]+)^", $link, $bits) == 1) {
+				if($bits[1] == 'Interface') return $this->path.'Images/'.$bits[2].$bits[3];
+				elseif($bits[1] == 'Resources') return Conf::read("WWW Path").'Resources/'.$bits[2].$bits[3];
+				elseif($bits[1] == 'Application') return Conf::read("WWW Path").'Applications/'.$bits[2].$bits[3];
+				elseif($bits[1] == 'Media') return Conf::read("WWW Path").'Media/'.$bits[2].$bits[3];
+				elseif($bits[1] == 'Root') return Conf::read("WWW Path").$bits[2].$bits[3];
+				else return Conf::read("WWW Path").$bits[1].'/'.$bits[2].$bits[3];
 			} elseif(preg_match("^ex://([0-9a-zA-Z]+)([/]*)^", $link, $bits) == 1) {
 				return Conf::read("WWW Path").$bits[1];
 			}
 		} else return $link;
 	}
 	
+	public function parse_links($string) {
+		
+	}
+	
 	/* Sidebars */
 	public function sidebar() {
 		$args = func_get_args();
 		$id = array_shift($args);
-		if(is_null($id)) { # New
-			if(is_even(count($args))) {
-				$i = 0;
-				do {
-					$a = $i; $b = $i + 1;
-					$x[crunch($args[$a])] = $args[$b];
-					$i = $i + 2;
-				} while($i <= count($args));
-				$this->sidebars[] = $x;
-				$this->sidebar_counter++;
-				return $this->sidebar_counter--;
-			} else {
-				Log::write("Interface::sidebar(new) Bad argument layout. Make sure argument count, including key, is an odd number.");
-			}
+		if(is_null($id) or in_array(crunch($id), array('div', 'menu', 'image', 'aimage'))) { # New
+			$tmp = eoargs($args);
+			$tmp['type'] = (is_null($id)) ? 'div' : crunch($id) ;
+			$this->sidebars[] = $tmp;
+			$this->sidebar_counter++;
+			return $this->sidebar_counter--;
 		} else { # Read or Edit
 			if($id == true) { # Read
+				$template['div']['head'] = $this->template("DIV with Head");
+				$template['div']['none'] = $this->template("DIV without Head");
+				$template['menu']['head'] = $this->template("Menu with Head");
+				$template['menu']['none'] = $this->template("Menu without Head");
+				$template['image']['head'] = $this->template("Image with Head");
+				$template['image']['none'] = $this->template("Image without Head");
+				$template['aimage']['head'] = $this->template("A Image with Head");
+				$template['aimage']['none'] = $this->template("A Image without Head");
 				if($args[0] == true) { # All Sidebars
 					if($args[1] == true) return $this->sidebars;
 					else {
-						$t_head = $this->template("Sidebar with Head");
-						$t_no_head = $this->template("Sidebar without Head");
 						foreach($this->sidebars as $id2 => $bar) {
-							if(!is_null($bar['title'])) printf($t_head, $bar['title'], $bar['content'], $id2);
-							else printf($t_no_head, $bar['content'], $id2);
+							if($bar['type'] != 'aimage') {
+								if(!is_null($bar['title'])) printf($template[$bar['type']]['head'], $bar['title'], $bar['content'], $id2);
+								else printf($template[$bar['type']]['none'], $bar['content'], $id2);
+							} else {
+								if(!is_null($bar['title'])) printf($template[$bar['type']]['head'], $bar['title'], $bar['content'], $bar['link'], $id2);
+								else printf($template[$bar['type']]['none'], $bar['content'], $bar['link'], $id2);
+							}
 						}
 					}
 				} else { # Sidebars by location
 					foreach($this->sidebars as $id2 => $bar) $x[$id2] = $bar;
 					if($args[1] == true) return $x;
 					else {
-						$t_head = $this->template("Sidebar with Head");
-						$t_no_head = $this->template("Sidebar without Head");
 						foreach($x as $id2 => $bar) {
-							if(!is_null($bar['title'])) printf($t_head, $bar['title'], $bar['content'], $id2);
-							else printf($t_no_head, $bar['content'], $id2);
+							if(!is_null($bar['title'])) printf($template[$bar['type']]['head'], $bar['title'], $bar['content'], $id2);
+							else printf($template[$bar['type']]['none'], $bar['content'], $id2);
 						}
 					}
 				}
@@ -305,21 +349,17 @@ class UserInterface {
 	/* Template */
 	public function template($name) {
 		$name = crunch($name);
-		if(file_exists(root."Resources/UI/$this->ui/Templates/$name.t"))
-			return file_get_contents(root."Resources/UI/$this->ui/Templates/$name.t");
-		elseif(file_exists(root."Resources/UI/System/Templates/$name.t"))
-			return file_get_contents(root."Resources/UI/System/Templates/$name.t");
-		else Log::write("Interface::template($name) Template not found in system or user defined interface bundles.");
+		return (isset($this->templates[$name])) ? $this->templates[$name] : $this->system_templates[$name] ;
 	}
-
+	
 	public function display_login() {
 		$this->interface_override = $this->login_window_interface;
-		$this->override_content = import("Login Window");
+		$this->content_override = $this->template("Login Window");
 		$this->override = true;
 	}
 	
 	/* Interface */
-	public function uinterface($set=null,$name=false) {
+	public function uinterface($set=null, $name=false) {
 		if(is_null($set)) {
 			if($this->override) {
 				$name = $this->interface_keys[$this->interface_override];
@@ -451,6 +491,10 @@ class UserInterface {
 		foreach($this->sidebars as $id => $bar) {
 			$output['sidebar-'.$id] = "<span style=\"color:#46A4FA;\">[{$bar['title']}]</span><br />{$bar['content']}";
 		}
+		# $templates = array();
+		foreach($this->templates as $name => $template) $output['templates'] .= "<br />  => <span style=\"color:#46A4FA;\">$name</span> : ".html_safe($template);
+		# $templates = array();
+		if(crunch($this->ui) != 'system') foreach($this->system_templates as $name => $template) $output['system-templates'] .= "<br />  => <span style=\"color:#46A4FA;\">$name</span> : ".html_safe($template);
 		
 		# Return or Echo
 		return diagnostic($output, $return);

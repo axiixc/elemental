@@ -9,7 +9,7 @@ class Home {
 			Log::write("Home::__construct() Could not locate previous run. Wrote defaults to system configuration.");
 		}
 		if(Conf::read("Homepage Source") == 'readme') {
-			add('<pre>'.html_safe(file_get_contents(root."README")).'</pre>');
+			add('<pre>'.str_replace('EVERYTHING HERE IS SUBJECT TO CHANGE!!', '<span style="background:red;padding:1px;color:white;">EVERYTHING HERE IS SUBJECT TO CHANGE!!</span>', html_safe(file_get_contents(root."README"))).'</pre>');
 		} else {
 			add(Conf::read("Homepage Text"));
 		}

@@ -19,7 +19,7 @@ class ManagedData {
 		} else {
 			$t = mysql_fetch_assoc($temp);
 			$this->structure['name'] = $t['structure'];
-			$this->structure['layout'] = unfold($t['layout']);
+			$this->structure['layout'] = unserialize($t['layout']);
 			$this->check = true;
 		}
 	}

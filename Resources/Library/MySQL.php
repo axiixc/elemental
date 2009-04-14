@@ -2,7 +2,7 @@
 
 class MySQL {
 	
-	private static $base, $prefix, $conf_file;
+	private static $base, $prefix, $conf_file, $queries=array();
 	
 	private function __construct() {
 	}
@@ -26,6 +26,7 @@ class MySQL {
 		$sql = str_replace('[prefix]', self::$prefix, $sql);
 		$sql = str_replace('[database]', self::$base, $sql);
 		if(count($args) > 0) $sql = vsprintf($sql, $args);
+		self::$queries[] = $sql;
 		return mysql_query($sql);
 	}
 	
@@ -36,6 +37,18 @@ class MySQL {
 		$r = fwrite($handle,$output);
 		fclose($handle);
 		return $r;
+	}
+	
+	public static function diagnostics($return=false) {
+		include self::$conf_file;
+		$output['host'] = $mysql_host;
+		$output['user'] = $mysql_user;
+		$output['password'] = '********'; # = $mysql_pass; # If you really mean it
+		$output['database'] = $mysql_base;
+		$output['prefix'] = $mysql_prefix;
+		$output['queries'] = "\n";
+		foreach(self::$queries as $query) $output['queries'] .= "$query\n";
+		return diagnostic($output, $return);
 	}
 	
 }
