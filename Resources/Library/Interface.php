@@ -229,7 +229,7 @@ class UserInterface {
 				if($link['name'] == 'SESSION_LOGINOUT' and $link['link'] == 'SESSION_LOGINOUT') {
 					if(Registry::fetch('UAuth')->login == true) {
 						$link['name'] = 'Logout';
-						$link['link'] = 'ex://Users/Login';
+						$link['link'] = 'ex://Users/Logout';
 					} else {
 						$link['name'] = 'Login';
 						$link['link'] = 'ex://Users/Login';
@@ -250,7 +250,7 @@ class UserInterface {
 				if($link['name'] == 'SESSION_LOGINOUT' and $link['link'] == 'SESSION_LOGINOUT') {
 					if(Registry::fetch('UAuth')->login == true) {
 						$link['name'] = 'Logout';
-						$link['link'] = 'ex://Users/Login';
+						$link['link'] = 'ex://Users/Logout';
 					} else {
 						$link['name'] = 'Login';
 						$link['link'] = 'ex://Users/Login';
@@ -354,7 +354,7 @@ class UserInterface {
 	
 	public function display_login() {
 		$this->interface_override = $this->login_window_interface;
-		$this->content_override = $this->template("Login Window");
+		$this->content_override = str_replace('LOGINPATH', $this->parse_link('ex://Users/Login'), $this->template("Login Window"));
 		$this->override = true;
 	}
 	
