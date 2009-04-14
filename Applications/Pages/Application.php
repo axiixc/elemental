@@ -14,20 +14,23 @@ if($_GET['arg'] == 'list' or !isset($_GET['arg']) or is_null($_GET['arg']) or $_
 		Registry::fetch('Interface')->template('Page List Item') :
 		'<div style="margin-bottom:10px;padding:10px 0;" class="Pages_List_Item"><a style="font-size:15px;" href="%2$s" class="Pages_List_Item_A">%3$s</a><div style="margin-top:10px;" class="Pages_List_Item_Content">%4$10.300s</div></div>' ;
 	
-	foreach($pages as $id => $page)
+	foreach($pages as $id => $page) {
 		$author = new User($page['author']);
 		add(
 			sprintf(
 				$template, 
-				$id, #1
-				Registry::fetch('Interface')->parse_link("ex://Pages/$id"), #2
+				$page['id'], #1
+				Registry::fetch('Interface')->parse_link("ex://Pages/{$page['id']}/"), #2
 				$page['name'], #3
 				strip_tags($page['content']), #4
-				$author->id, #5
-				$author->profile_link, #6
-				$author_name #7
+				format_date($page['modified'], $date_format), #5
+				format_date($page['created'], $date_format), #6
+				$author->id, #7
+				$author->profile_link, #8
+				$author->display_name #9
 			)
 		);
+	}	
 } else {
 	$page = Registry::fetch('Application')->read($_GET['arg']);
 	

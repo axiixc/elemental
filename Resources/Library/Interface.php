@@ -29,6 +29,7 @@ class UserInterface {
 	public $sidebars = array();
 	public $templates = array();
 	public $system_templates = array();
+	public $avatar=array();
 	
 	public function __construct($ui=null) {
 		# Check for UI Init type
@@ -63,6 +64,10 @@ class UserInterface {
 			include root.'Resources/UI/'.$this->ui.'/Templates.php';
 			$this->templates = $templates;
 		}
+		if(isset($Interface['avatar_full'])) $this->avatar['full'] = $Interface['avatar_full'];
+		else $this->avatar['full'] = Conf::read('WWW Path').'Resources/UI/System/Images/avatar-full.png';
+		if(isset($Interface['avatar_small'])) $this->avatar['small'] = $Interface['avatar_small'];
+		else $this->avatar['small'] = Conf::read('WWW Path').'Resources/UI/System/Images/avatar-small.png';
 	}
 	
 	/* Meta */
@@ -226,7 +231,7 @@ class UserInterface {
 			# Build the output
 			$output = $pre;
 			foreach($navigation as $link) {
-				if($link['name'] == 'SESSION_LOGINOUT' and $link['link'] == 'SESSION_LOGINOUT') {
+				if($link['name'] == '[[SESSION_LOGINOUT]]' and $link['link'] == '[[SESSION_LOGINOUT]]') {
 					if(Registry::fetch('UAuth')->login == true) {
 						$link['name'] = 'Logout';
 						$link['link'] = 'ex://Users/Logout';
@@ -247,7 +252,7 @@ class UserInterface {
 			# Build the output
 			$output = $pre;
 			foreach($navigation as $link) {
-				if($link['name'] == 'SESSION_LOGINOUT' and $link['link'] == 'SESSION_LOGINOUT') {
+				if($link['name'] == '[[SESSION_LOGINOUT]]' and $link['link'] == '[[SESSION_LOGINOUT]]') {
 					if(Registry::fetch('UAuth')->login == true) {
 						$link['name'] = 'Logout';
 						$link['link'] = 'ex://Users/Logout';
@@ -267,7 +272,7 @@ class UserInterface {
 	/* TODO: Add file_exists() style link checking */
 	public function parse_link($link) {
 		if(substr($link, 0, 5) == 'ex://') {
-			if (preg_match("^ex://([0-9a-zA-Z]+)/([0-9a-zA-Z_./]+)([0-9a-zA-Z_./?&=]+)^", $link, $bits) == 1) {
+			if (preg_match("^ex://([0-9a-zA-Z]+)/([0-9a-zA-Z_./-]+)([0-9a-zA-Z_./-?&=]+)^", $link, $bits) == 1) {
 				if($bits[1] == 'Interface') return $this->path.'Images/'.$bits[2].$bits[3];
 				elseif($bits[1] == 'Resources') return Conf::read("WWW Path").'Resources/'.$bits[2].$bits[3];
 				elseif($bits[1] == 'Application') return Conf::read("WWW Path").'Applications/'.$bits[2].$bits[3];
@@ -354,7 +359,7 @@ class UserInterface {
 	
 	public function display_login() {
 		$this->interface_override = $this->login_window_interface;
-		$this->content_override = str_replace('LOGINPATH', $this->parse_link('ex://Users/Login'), $this->template("Login Window"));
+		$this->content_override = str_replace('[[LOGINPATH]]', $this->parse_link('ex://Users/Login'), $this->template("Login Window"));
 		$this->override = true;
 	}
 	
@@ -495,7 +500,9 @@ class UserInterface {
 		foreach($this->templates as $name => $template) $output['templates'] .= "<br />  => <span style=\"color:#46A4FA;\">$name</span> : ".html_safe($template);
 		# $templates = array();
 		if(crunch($this->ui) != 'system') foreach($this->system_templates as $name => $template) $output['system-templates'] .= "<br />  => <span style=\"color:#46A4FA;\">$name</span> : ".html_safe($template);
-		
+		# $avatar = array();
+		$output['fullsize-avatar'] = $this->avatar['full'];
+		$output['small-avatar'] = $this->avatar['small'];
 		# Return or Echo
 		return diagnostic($output, $return);
 	}

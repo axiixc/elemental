@@ -2,6 +2,7 @@
 
 # System Version
 define('EXSystemVersion', 0.4);
+define('EXSystemBuild', 0004);
 
 # System Definitions
 define('UIError', 'UIError');

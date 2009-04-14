@@ -78,10 +78,12 @@ class UserAuthentication {
 	public function test_login() {
 		Log::write('Test Login');
 		$this->action = 'Testing Login';
-		$this->create_session();
+		if($this->create_session())
+		if($this->login === true) header('Location: '.Registry::fetch('Interface')->parse_link(Conf::read("Login Redirect")));
+		if($this->login === false and $this->guest === false) Registry::fetch('Interface')->notification(UIError, 'Login failed. Check your username and password.');
 	}
 	
-	private function load_session($user, $session) {
+	public function load_session($user, $session) {
 		Log::write('load_session invoked');
 		if($user == 'guest') {
 			Log::write("LOAD SESSION: GUEST");
@@ -114,7 +116,7 @@ class UserAuthentication {
 		}
 	}
 	
-	private function create_session() {
+	public function create_session() {
 		Log::write('create_session invoked');
 		
 		$limit = $this->limit;
