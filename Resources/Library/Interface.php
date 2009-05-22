@@ -1,5 +1,7 @@
 <?php # User Interface Management [axiixc]
 
+/* Add sidebar order support by weight */
+
 class UserInterface {
 	
 	/* Variable Hell */
@@ -72,11 +74,13 @@ class UserInterface {
 	
 	/* Meta */
 	public function title($return=false) {
-		if(!is_null($this->title)) {
-			$output = str_replace('%a', $this->title, $this->head_template);
+		if(!is_null($this->app_title)) {
+			$output = str_replace('%a', $this->app_title, $this->title_template);
 			$output = str_replace('%t', $this->system_title, $output);
-		} else $output = $this->system_title;
-		if($return) return $output;
+		} else {
+			$output = str_replace('%a', $this->tagline, $this->title_template);
+			$output = str_replace('%t', $this->system_title, $output);
+		} if($return) $output;
 		else printf("\t<title>%s</title>\n", $output);
 	}
 	
@@ -155,6 +159,8 @@ class UserInterface {
 	/* Notifications */
 	public function notification() {
 		$args = func_get_args();
+		# Some cleanup to deal with the shortcut function
+		foreach($args as $key => $value) if(is_null($value)) unset($args[$key]);
 		if(count($args) == 0 or $args[0] == UINotification) { # Echo All
 			foreach($this->notifications[UIError] as $item) printf($this->template("Notification UIError"), $item);
 			foreach($this->notifiactions[UINotice] as $item) printf($this->template("Notification UINotice"), $item);
@@ -224,55 +230,42 @@ class UserInterface {
 			while($row = mysql_fetch_assoc($result)) $navigation[] = $row;
 		} # $navigation now complete
 		
-		if($pre === true) { # Return
-			if(is_null($pre2)) $pre = $this->template("Menu Pre");
-			if(is_null($item)) $item = $this->template("Menu Item");
-			if(is_null($post)) $post = $this->template("Menu Post");
-			# Build the output
-			$output = $pre;
-			foreach($navigation as $link) {
-				if($link['name'] == '[[SESSION_LOGINOUT]]' and $link['link'] == '[[SESSION_LOGINOUT]]') {
-					if(Registry::fetch('UAuth')->login == true) {
-						$link['name'] = 'Logout';
-						$link['link'] = 'ex://Users/Logout';
-					} else {
-						$link['name'] = 'Login';
-						$link['link'] = 'ex://Users/Login';
-					}
-				}
-				$lnk = $this->parse_link($link['link']);
-				# Sense for CURRENT goes here
-				$output .= sprintf($item, $lnk, $link['name'], $current);
-			} $output .= $post;
-			return $output;
-		} else { # Echo
-			if(is_null($pre)) $pre = $this->template("Menu Pre");
-			if(is_null($item)) $item = $this->template("Menu Item");
-			if(is_null($post)) $post = $this->template("Menu Post");
-			# Build the output
-			$output = $pre;
-			foreach($navigation as $link) {
-				if($link['name'] == '[[SESSION_LOGINOUT]]' and $link['link'] == '[[SESSION_LOGINOUT]]') {
-					if(Registry::fetch('UAuth')->login == true) {
-						$link['name'] = 'Logout';
-						$link['link'] = 'ex://Users/Logout';
-					} else {
-						$link['name'] = 'Login';
-						$link['link'] = 'ex://Users/Login';
-					}
-				}
-				$lnk = $this->parse_link($link['link']);
-				# Sense for CURRENT goes here
-				$output .= sprintf($item, $lnk, $link['name'], $current);
-			} $output .= $post;
-			echo $output;
+		if($pre === true) {
+			unset($pre);
+			$pre == $pre2;
+			$return = true;
 		}
+		
+		if(is_null($pre)) $pre = $this->template("Menu Pre");
+		if(is_null($item)) $item = $this->template("Menu Item");
+		if(is_null($post)) $post = $this->template("Menu Post");
+		# Build the output
+		$output = $pre;
+		foreach($navigation as $link) {
+			if($link['name'] == '[[SESSION_LOGINOUT]]' and $link['link'] == '[[SESSION_LOGINOUT]]') {
+				if(Registry::fetch('UAuth')->login == true) {
+					$link['name'] = 'Logout';
+					$link['link'] = 'ex://Users/Logout';
+				} else {
+					$link['name'] = 'Login';
+					$link['link'] = 'ex://Users/Login';
+				}
+			}
+			if($link['link'] == '[[HOME]]') $link['link'] = Conf::read("Home Link");
+			if($link['link'] == null or is_null($link['link'])) $link['link'] == 'javascript:;';
+			$lnk = $this->parse_link($link['link']);
+			$current = ($this->is_page($lnk) === true) ? ' class="current" ' : null ;
+			$output .= sprintf($item, $lnk, $link['name'], $current);
+		} $output .= $post;
+		
+		if($return === true) return $output;
+		else echo $output;
 	}
 	
 	/* TODO: Add file_exists() style link checking */
 	public function parse_link($link) {
 		if(substr($link, 0, 5) == 'ex://') {
-			if (preg_match("^ex://([0-9a-zA-Z]+)/([0-9a-zA-Z_./-]+)([0-9a-zA-Z_./-?&=]+)^", $link, $bits) == 1) {
+			if (preg_match("^ex://([0-9a-zA-Z]+)/([0-9a-zA-Z_./-]+)([0-9a-zA-Z_./-?%&=]+)^", $link, $bits) == 1) {
 				if($bits[1] == 'Interface') return $this->path.'Images/'.$bits[2].$bits[3];
 				elseif($bits[1] == 'Resources') return Conf::read("WWW Path").'Resources/'.$bits[2].$bits[3];
 				elseif($bits[1] == 'Application') return Conf::read("WWW Path").'Applications/'.$bits[2].$bits[3];
@@ -285,13 +278,26 @@ class UserInterface {
 		} else return $link;
 	}
 	
-	public function parse_links($string) {
-		
+	public function is_page($link) {
+		$app = ($_GET['app'] != null) ? $_GET['app'] : Conf::read("Application") ;
+		$arg = ($_GET['arg'] != null) ? '/'.uncrunch($_GET['arg']) : null ;
+		$gets = $_GET;
+		unset($gets['app']); unset($gets['arg']);
+		$get = null;
+		foreach($gets as $key => $value) {
+			$get .= "$key=$value&";
+		} $get = substr($get, 0, strlen($get)-1);
+		if($get != null) $get = "?$get";
+		return (strtolower($link) == strtolower(Conf::read('WWW Path').$app.$arg.$get)) ? true : false ;
 	}
+	
+	#public function parse_links($string) {}
 	
 	/* Sidebars */
 	public function sidebar() {
 		$args = func_get_args();
+		# Some cleanup to deal with the shortcut function
+		foreach($args as $key => $value) if(is_null($value)) unset($args[$key]);
 		$id = array_shift($args);
 		if(is_null($id) or in_array(crunch($id), array('div', 'menu', 'image', 'aimage'))) { # New
 			$tmp = eoargs($args);
@@ -358,6 +364,7 @@ class UserInterface {
 	}
 	
 	public function display_login() {
+		setcookie('ref', $_SERVER['HTTP_REFERER'], minute, '/');
 		$this->interface_override = $this->login_window_interface;
 		$this->content_override = str_replace('[[LOGINPATH]]', $this->parse_link('ex://Users/Login'), $this->template("Login Window"));
 		$this->override = true;
@@ -509,12 +516,190 @@ class UserInterface {
 	
 }
 
-/* Shortcuts */
+class navigationController {
+	
+	public $items = array();
+	public $pattern;
+	public $style = array();
+	public $query_format;
+	public $id;
+	public $location;
+	public $total;
+	
+	public function __construct($id, $total, $default_location=1, $alt_query=null) {
+		$id = crunch($id);
+		
+		# Conf
+		$this->id = $id;
+		$this->total = $total;
+		$this->items['x'] = 5;
+		$this->items['z'] = 5;
+		
+		# Location
+		if(isset($_GET[$id])) {
+			$this->location = (int) $_GET[$id];
+		} else {
+			$this->location = $default_location;
+		} if($this->location < 0) $this->location = $default_location;
+		
+		# Query
+		if(is_null($alt_query)) { # Um, can this be shortend, or modify whereami();
+			$app = ($_GET['app'] != null) ? $_GET['app'] : Conf::read("Application") ;
+			$arg = ($_GET['arg'] != null) ? '/'.uncrunch($_GET['arg']) : null ;
+			$gets = $_GET;
+			foreach($gets as $id => $value) $gets[$id] = str_replace('%1$s', null, $value);
+			unset($gets['app']); unset($gets['arg']); unset($gets[$this->id]);
+			$gets[$this->id] = '%1$s';
+			$get = null;
+			foreach($gets as $key => $value) {
+				$get .= "$key=$value&";
+			} $get = substr($get, 0, strlen($get)-1);
+			if($get != null) $get = "?$get";
+			$this->query = Conf::read('WWW Path').$app.$arg.$get;
+		} else $this->query = $alt_query;
+		
+		# Templates
+		$this->style['wrapper'] = (!is_null(template('Navigation Controller Wrapper'))) ?
+			template('Navigation Controller Wrapper') :
+			'<ul>%1$s %2$s %3$s %4$s %5$s</ul>';
+			
+		$this->style['next']	 = (!is_null(template('Navigation Controller Next'))) ?
+			template('Navigation Controller Next') :
+			'<li><a href="%1$s">Next</a></li>';
+				
+		$this->style['previous']	 = (!is_null(template('Navigation Controller Previous'))) ?
+			template('Navigation Controller Previous') :
+			'<li><a href="%1$s">Previous</a></li>';
+				
+		$this->style['item'] = (!is_null(template('Navigation Controller Item'))) ?
+			template('Navigation Controller Item') :
+			'<li><a href="%1$s">%2$s</a></li>';
+			
+		$this->style['current'] = (!is_null(template('Navigation Controller Current'))) ?
+			template('Navigation Controller Current') :
+			'<li><a href="javascript:;" style="background:red">%1$s</a></li>';
+	}
+	
+	public function set_style($id, $style) {
+		if(is_array($id)) {
+			$this->style = array_merge($this->style, $id);
+		} else {
+			$this->style[$id] = $style;
+		}
+	}
+	
+	public function items($int, $one=false) {
+		if($one) {
+			$this->items['x'] = round($int / 2);
+			$this->items['z'] = round($int / 2);
+		} else {
+			$this->items['x'] = $this->items['z'] = round($int);
+		}
+	}
+	
+	public function items_x($int) {
+		$this->items['x'] = round($int);
+	}
+	
+	public function items_z($int) {
+		$this->items['z'] = round($int);
+	}
+	
+	public function generate() {
+		# $items['next'] = sprintf($this->style['next'], $link);
+		# $items['x'] .= sprintf($this->style['item'], $link, $number);
+		# $items['y'] = sprintf($this->style['current'], $this->location);
+		# $items['z'] .= sprintf($this->style['item'], $link, $number);
+		# $items['previous'] = sprintf($this->style['previous'], $link);
+		
+		# Next
+		if($this->location > 1)
+			$items['next'] = sprintf($this->style['next'], sprintf($this->query, $this->location - 1));
+		
+		# Lower Numbers
+		$starting_number = $this->location - $this->items['x'];
+		$starting_number = ($starting_number <= 0) ? 1 : $starting_number ;
+		$ending_number = $this->location - 1;
+		while($starting_number <= $ending_number) {
+			$items['x'] .= sprintf($this->style['item'], sprintf($this->query, $starting_number), $starting_number);
+			$starting_number++;
+		}
+		
+		# Current
+		$items['y'] = sprintf($this->style['current'], $this->location);
+		
+		# Higher Numbers
+		$starting_number = $this->location + 1;
+		$ending_number = $this->location + $this->items['z'];
+		$ending_number = ($ending_number >= $this->total) ? $this->total : $ending_number ;
+		while($starting_number <= $ending_number) {
+			$items['z'] .= sprintf($this->style['item'], sprintf($this->query, $starting_number), $starting_number);
+			$starting_number++;
+		}
+		
+		# Previous
+		if($this->location < $this->total)
+			$items['previous'] = sprintf($this->style['previous'], sprintf($this->query, $this->location + 1));
+		
+		return sprintf($this->style['wrapper'], $items['next'], $items['x'], $items['y'], $items['z'], $items['previous']);
+	}
+	
+	public function add() {
+		add($this->generate());
+	}
+	
+	public function location() {
+		return $this->location;
+	}
+	
+	public function total() {
+		return $this->total;
+	}
+
+}
+
+/* Shortcuts (tested) */
 function add($string) {
 	Registry::fetch('Interface')->content .= $string;
+}
+
+function js($str, $head=true) {
+	return Registry::fetch('Interface')->js_add($str, $head);
+}
+
+function js_inc($str, $head=true) {
+	return Registry::fetch('Interface')->js_include($str, $head);
 }
 
 function path($return=false) {
 	if($return) return Registry::fetch('Interface')->path;
 	else echo Registry::fetch('Interface')->path;
+}
+
+function title($str) {
+	Registry::fetch('Interface')->app_title = $str;
+}
+
+function parse_link($str) {
+	return Registry::fetch('Interface')->parse_link($str);
+}
+
+function sidebar($a=null, $b=null, $c=null, $d=null, $e=null, $f=null, $g=null, $h=null, $i=null) {
+	return Registry::fetch('Interface')->sidebar($a,$b,$c,$d,$e,$f,$g,$h,$i);
+}
+
+function notification($a=null, $b=null, $c=null, $d=null, $e=null, $f=null, $g=null, $h=null, $i=null) {
+	return Registry::fetch('Interface')->notification($a,$b,$c,$d,$e,$f,$g,$h,$i);
+}
+
+function menu($input, $pre=null, $item=null, $post=null, $pre2=null) {
+	return Registry::fetch('Interface')->menu($input, $pre, $item, $post, $pre2);
+}
+
+function template($str) {
+	return Registry::fetch('Interface')->template($str);
+}
+
+function error($title=null, $message=null) {
+	return Registry::fetch('Interface')->error($title, $message);
 }

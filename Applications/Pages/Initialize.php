@@ -3,4 +3,4 @@
 if(
 	Registry::fetch('UAuth')->type(UATypeAdmin) and 
 	Registry::fetch('UAuth')->role(explode(',', Conf::read('Blog Admin Roles')))
-) Registry::write('edit_links', true);
+) Registry::write('Edit Links', true);

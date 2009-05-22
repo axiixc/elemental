@@ -4,6 +4,7 @@ class Pages {
 	
 	public function __construct() {}
 	
+	/* Accepts array() */
 	public function read($x) {
 		if($x > 0) return $this->read_with_id($x);
 		elseif(is_array($x)) {
@@ -14,16 +15,15 @@ class Pages {
 	
 	public function read_with_slug($slug) {
 		$result = MySQL::query("SELECT * FROM `[prefix]pages` WHERE `slug` LIKE CONVERT(_utf8 '%s' USING latin1) COLLATE latin1_swedish_ci LIMIT 0, 1", $slug);
-		if(mysql_num_rows($result) > 0) return mysql_fetch_assoc($result);
-		else return false;
+		return (mysql_num_rows($result) > 0) ? mysql_fetch_assoc($result) : false ;
 	}
 	
 	public function read_with_id($id) {
 		$result = MySQL::query("SELECT *  FROM `[prefix]pages` WHERE `id` = %u", $id);
-		if(mysql_num_rows($result) > 0) return mysql_fetch_assoc($result);
-		else return false;
+		return (mysql_num_rows($result) > 0) ? mysql_fetch_assoc($result) : false ;
 	}
 	
+	/* Does not accept array() */
 	public function write() {
 		$args = func_get_args();
 		$sid = array_shift($args);
@@ -50,6 +50,7 @@ class Pages {
 		return MySQL::query("INSERT INTO `[database]`.`[prefix]pages` (`id`, `slug`, `name`, `content`, `author`, `created`, `modified`) VALUES (NULL, '%s', '%s', '%s', '%s', '%6\$s', '%6\$s'');", $id, $args['slug'], $args['name'], $args['content'], $args['author'], date('Ymd'));
 	}
 	
+	/* Accepts array() */
 	public function delete($id) {
 		if($id > 0) return $this->read_with_id($id);
 		elseif(is_array($id)) {

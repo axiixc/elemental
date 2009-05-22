@@ -5,7 +5,6 @@ include 'Colorsheet.php';
 
 #echo <<<CSS
 
-
 #CSS;
 
 ?>

@@ -70,15 +70,14 @@ if($id == 'list' or is_null($id) or $id == null) { # List View
 	
 } elseif($id == 'search') {
 	Log::write('Blog: SEARCH');
-	
-	Registry::fetch('Interface')->error('Feature Not Supported', 'Sorry but this feature has yet to be implemented.');
+	error('Feature Not Supported', 'Sorry but this feature has yet to be implemented.');
 	
 } else { # Item View
 	Log::write('Blog: ITEM');
 	
 	$data = Registry::fetch('Application')->read($id);
-	$template = (Registry::fetch('Interface')->template('Blog Post')) ?
-		Registry::fetch('Application')->template('Blog Post') :
+	$template = (is_null(template('Blog Post'))) ?
+		template('Blog Post') :
 		'<div><h1>%3$s<div style="font-size:small;">Posted by <a href="%9$s">%10$s</a> on %6$s</div></h1><div>%4$s</div></div>';
 	
 	$author = new User($data['author']);
@@ -111,8 +110,10 @@ for ($i=0; $i < Conf::read("Blog Number Archive Links"); $i++) {
 	$month_number = ($month_number > 01) ? $month_number - 1 : 12 ;
 	$month_name = $months[$month_number];
 	$year_number = ($month_number == 01) ? $year_number - 1 : $year_number ;
-	$date_array[] = array('link' => Registry::fetch('Interface')->parse_link(sprintf("ex://Blog/Search?date&month=%s&year=%s", $month_number, $year_number)), 'name' => $month_name);
-} Registry::fetch('Interface')->sidebar('menu', 'title', 'Archives', 'content', Registry::fetch('Interface')->menu($date_array, true));
+	$date_array[] = array('link' => parse_link(sprintf("ex://Blog/Search?date&month=%s&year=%s", $month_number, $year_number)), 'name' => $month_name);
+}
+$truth[] = array('link' => 'javascript:;', 'name' => 'Feature not yet implemented');
+sidebar('menu', 'title', 'Archives', 'content', menu($truth, true));
 
 /* By Comments */
 /* By Views */

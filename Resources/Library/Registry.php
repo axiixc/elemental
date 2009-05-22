@@ -38,13 +38,13 @@ class Registry {
 	}
 	
 	public static function read($name) {
-		$name = crunch($object_name);
+		$name = crunch($name);
 		if(isset(self::$environment[$name])) return self::$environment[$name];
 		else Log::write("Registry::read($name) Environment variable does not exist.");
 	}
 	
 	public static function delete($name) {
-		$name = crunch($object_name);
+		$name = crunch($name);
 		if(isset(self::$environment[$name])) unset(self::$environment[$name]);
 		else Log::write("Registry::delete($name) Environment variable does not exist.");
 	}

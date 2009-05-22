@@ -1,23 +1,23 @@
 <?php # Main System Execution Script [axiixc]
 
+#error_reporting(E_ALL);
+
 # Index check
 if(isset($index)) define('root', $index);
 else die('<b style="color:red">ERROR:</b> You must operate from the index file.');
 
-# Include the Library
-$required_libraries = array('Dictionary', 'Utilities', 'Cache', 'Registry', 'System', 'Log', 'Filesystem', 'MySQL', 'Conf', 'Interface', 'UserAuthentication');
-foreach($required_libraries as $library) require_once "Library/$library.php";
+# System Package (fixed for some PHP configurations)
+include(root . 'Resources/Packages/System/Package.php');
+include(root . 'Resources/Packages/Developers/Package.php');
 
-# The system resource packages
-include package('System');
-include package('Developers');
+# Include the Library
+$required_libraries = array('Dictionary', 'Utilities', 'Cache', 'Registry', 
+'System', 'Log', 'Filesystem', 'MySQL', 'Conf', 'Interface', 'UserAuthentication');
+foreach($required_libraries as $library) require_once "Library/$library.php";
 
 # Awake Services and Setup
 if(Conf::read("Use Cache")) Cache::awake();
-if(Conf::read("Preload Conf"))
-	if(Cache::enabled()) Conf::awake(Cache::fetch("Conf"));
-	else Conf::awake();
-if(client_ip == '::1') Conf::$conf['www-path'] = 'http://localhost/Elemental/';
+Conf::awake();
 $_GET['arg'] = crunch($_GET['arg']);
 
 # Register Objects
@@ -32,18 +32,27 @@ Registry::fetch('UAuth')->awake();
 $app_list = FSDirRead(root.'Applications', true, lower_case_filename);
 $app_path = $app_list[strtolower(Registry::fetch('System')->app)];
 if(file_exists($app_path.'Application.php')) {
-	# Initilization Code
-	if(file_exists($app_path.'Initialize.php')) {
+	
+	if(file_exists($app_path.'Initialize.php'))
 		include $app_path.'Initialize.php';
-		# Do UAuth finalization here
-	} if(file_exists($app_path.'Resources.php')) {
+	
+	if(Registry::fetch('UAuth')->verification and file_exists($app_path.'Info.php')) {
+		include $app_path.'Info.php';
+		if(!is_null($application['name'])) title($application['name']);
+	}
+	
+	if(Registry::fetch('UAuth')->verification and file_exists($app_path.'Resources.php')) {
 		include $app_path.'Resources.php';
 		$class_name = uncrunch(Registry::fetch('System')->app);
 		Registry::register('Application', new $class_name);
-	} require_once $app_path.'Application.php';
+	}
+	
+	if(Registry::fetch('UAuth')->verification)
+		require_once $app_path.'Application.php';
+	
 } else {
-	Log::write("Application Load: Application file could not be found. Bundle invalid.");
-	Registry::fetch('Interface')->error("Application Not Found", "The application you tried to access does not exist. Recheck your URL or <a href=\"ex://System/Home\">click here</a> to go to the home page.");
+	Log::write("Application Load: Application ({$_GET['app']}) could not be found. Bundle invalid.");
+	Registry::fetch('Interface')->error("Application Not Found", "Invalid application bundle. <a href=\"ex://System/Home\">click here</a> to go to the home page.");
 }
 
 # Logs and Diagnostics [ clear : log : mysql : get : reg : cache : conf : ua : ui ]
@@ -71,13 +80,14 @@ if(Conf::read("Development Mode")) {
 	}
 }
 
-# Allow applications to add log to content at last second
+# Allow for last minute log
 if(Log::output()) add(Log::read(true));
 
-# Load the UI (this used to be 10 lines)
+# User Interface Setup
 if(!Registry::fetch("Interface")->direct_echo) include Registry::fetch("Interface")->uinterface();
 
 # Sleep Services
+if(Conf::read("Development Mode")) Cache::update();
 Conf::sleep();
 Cache::sleep();
 Log::sleep();

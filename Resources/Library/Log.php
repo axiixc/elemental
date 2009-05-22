@@ -22,8 +22,12 @@ class Log {
 	
 	public static function read($return=false, $array=false) {
 		self::write("Log Close: ".time());
-		$master = Registry::fetch("Interface")->template("Log");
-		$template = Registry::fetch("Interface")->template("Log Message");
+		$master = (!is_null(template('Log'))) ?
+			template('Log') :
+			'<pre class="log">%1$s</pre>' ;
+		$template = (!is_null(template('Log Message'))) ?
+			template('Log Message') :
+			'[%1$03s] %3$s<br />' ;
 		if(count(self::$log) > 0) {
 			foreach(self::$log as $id => $message)
 				$log .= sprintf($template, $id, $message['time'], $message['message']);

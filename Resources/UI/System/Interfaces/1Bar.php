@@ -33,6 +33,7 @@
 			<ul class="niceMenu green" style="border-bottom: 35px solid <?php echo $green_dull; ?>">
 				<li><h2>&nbsp;</h2></li>
 				<li class="footer-special"><p><?php echo Registry::fetch('Interface')->footer; ?></p></li>
+				<li class="footer-special"><p>Awesome background image by <a href="http://mickka.deviantart.com/">Mickka</a></p></li>
 				<li class="footer-about"><center><a href="http://github.com/axiixc/elemental/tree"><img src="<?php path(); ?>Images/elemental-logo-grey.png" /></a></center></li>
 			</ul>
 		</div>

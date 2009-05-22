@@ -14,12 +14,12 @@ function path_safe($path, $strict=false) {
 function mysql_safe($str, $char="\\'\"") {
 	$chars = str_split($char);
 	foreach($chars as $i) $str = str_replace($i, "\\$i", $str);
-	return $str;
+	return mysql_escape_string($str);
 }
 
-function html_safe($str) {
-	$str = str_replace('<', '&lt;', $str);
-	return str_replace('>', '&gt;', $str);
+function html_safe($str=null) {
+	if(!is_string($str)) Log::write('html_safe() Must be string.');
+	else return htmlspecialchars($str);
 }
 
 function filename($str) { $nfo = pathinfo($str); return $nfo['filename']; }
@@ -99,6 +99,19 @@ function wcsubstr($str_String, $int_Length) {
 function format_date($is=null, $want=null) {
 	$want = (is_null($want)) ? Conf::read("Date Format") : $want ;
 	return (is_null($is)) ? date($want) : date($want, strtotime($is)) ;
+}
+
+function whereami() {
+	$app = ($_GET['app'] != null) ? $_GET['app'] : Conf::read("Application") ;
+	$arg = ($_GET['arg'] != null) ? '/'.uncrunch($_GET['arg']) : null ;
+	$gets = $_GET;
+	unset($gets['app']); unset($gets['arg']);
+	$get = null;
+	foreach($gets as $key => $value) {
+		$get .= "$key=$value&";
+	} $get = substr($get, 0, strlen($get)-1);
+	if($get != null) $get = "?$get";
+	return Conf::read('WWW Path').$app.$arg.$get;
 }
 
 function content_type($input) {

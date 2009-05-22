@@ -2,24 +2,22 @@
 
 class Users {
 	
-	public function __construct() {
-		
-	}/* foo bar */
+	public function __construct() {}
 	
 	public function display_profile($user_id=null) {
 		# Fetch User Info
 		if(is_null($user_id)) $user_id = Registry::fetch('UAuth')->user['id'];
-		$user = new User($user_id);
-	
+		$user = new User($user_id, true);
+		
 		# Just get it over with
-		if($user->private == 1) {
-			Registry::fetch('Interface')->error("Profile is Private", "This user has chosen to keep their profile private.");
+		if($user->private_profile == 1) {
+			error("Profile is Private", "This user has chosen to keep their profile private.");
 			return null;
 		}
 		
-		# Do the templating
-		$template_profile_page = (!is_null(Registry::fetch('Interface')->template('Profile Page'))) ?
-			Registry::fetch('Interface')->template('Profile Page') :
+		# Do the templating [profile-page:profile-page-service-wrapper:profile-page-service:profile-page-service-names]
+		$template_profile_page = (!is_null(template('Profile Page'))) ?
+			template('Profile Page') :
 			<<<EOD
 			<h1>%2\$s<div style="font-size:small">%3\$s %5\$s</div></h1>
 			<img src="%11\$s" />
@@ -31,45 +29,62 @@ class Users {
 			<blockquote>%9\$s</blockquote>
 			-- %7\$s
 EOD;
-		$template_service_wrapper = (!is_null(Registry::fetch('Interface')->template('Profile Page Service Wrapper'))) ?
-			Registry::fetch('Interface')->template('Profile Page Service Wrapper') :
-			'<tr><td>%s</td><td><ul>%s</ul></td></tr>';
 		
-		$template_service = (!is_null(Registry::fetch('Interface')->template('Profile Page Service'))) ?
-			Registry::fetch('Interface')->template('Profile Page Service') :
-			'<li>%s</li>';
+		$template_service_wrapper = (!is_null(template('Profile Page Service Wrapper'))) ?
+			template('Profile Page Service Wrapper') :
+			'<tr><td>%1$s</td><td><ul>%2$s</ul></td></tr>';
+		
+		$template_service = (!is_null(template('Profile Page Service'))) ?
+			template('Profile Page Service') :
+			'<li>%1$s</li>';
 			
-		$service_names = (!is_null(Registry::fetch('Interface')->template('Profile Page Service Names'))) ?
-			unserialize(Registry::fetch('Profile Page Service Names')) :
+		# A bit odd, should we compensate for this somehow?
+		$service_names = (!is_null(template('Profile Page Service Names'))) ?
+			template('Profile Page Service Names') :
 			array('web' => 'Web', 'aim' => 'AIM', 'skype' => 'Skype', 'msn' => 'MSN', 'gtalk' => 'Google Talk', 'irc' => 'IRC') ;
 			
 		# Create the Services
 		#WEB
-		if(count($user->other['web']) > 0) foreach($user->other['web'] as $item) $tmp_web .= sprintf($template_service, "<a href=\"$item\">$item</a>");
-		$service[] = sprintf($template_service_wrapper, $service_names['web'], $tmp_web);
+		if(count($user->other['web']) > 0) {
+			foreach($user->other['web'] as $item) 
+				$tmp_web .= sprintf($template_service, "<a href=\"$item\">$item</a>");
+			$services .= sprintf($template_service_wrapper, $service_names['web'], $tmp_web);
+		}
 		
 		#AIM
-		if(count($user->other['aim']) > 0) foreach($user->other['aim'] as $item) $tmp_aim .= sprintf($template_service, "<a href=\"aim:$item\">$item</a>");
-		$service[] = sprintf($template_service_wrapper, $service_names['aim'], $tmp_aim);
+		if(count($user->other['aim']) > 0) {
+			foreach($user->other['aim'] as $item)
+				$tmp_aim .= sprintf($template_service, "<a href=\"aim:$item\">$item</a>");
+			$services .= sprintf($template_service_wrapper, $service_names['aim'], $tmp_aim);
+		}
 		
 		#SKYPE
-		if(count($user->other['skype']) > 0) foreach($user->other['skype'] as $item) $tmp_skype .= sprintf($template_service, "<a href=\"skype:$item\">$item</a>");
-		$service[] = sprintf($template_service_wrapper, $service_names['skype'], $tmp_skype);
+		if(count($user->other['skype']) > 0) {
+			foreach($user->other['skype'] as $item)
+				$tmp_skype .= sprintf($template_service, "<a href=\"skype:$item\">$item</a>");
+			$services .= sprintf($template_service_wrapper, $service_names['skype'], $tmp_skype);
+		}
 		
 		#MSN
-		if(count($user->other['msn']) > 0) foreach($user->other['msn'] as $item) $tmp_msn .= sprintf($template_service, "<a href=\"msn:$item\">$item</a>");
-		$service[] = sprintf($template_service_wrapper, $service_names['msn'], $tmp_msn);
+		if(count($user->other['msn']) > 0) {
+			foreach($user->other['msn'] as $item)
+				$tmp_msn .= sprintf($template_service, "<a href=\"msn:$item\">$item</a>");
+			$services .= sprintf($template_service_wrapper, $service_names['msn'], $tmp_msn);
+		}
 		
 		#GTALK
-		if(count($user->other['gtalk']) > 0) foreach($user->other['gtalk'] as $item) $tmp_gtalk .= sprintf($template_service, "<a href=\"gtalk:$item\">$item</a>");
-		$service[] = sprintf($template_service_wrapper, $service_names['gtalk'], $tmp_gtalk);
+		if(count($user->other['gtalk']) > 0) {
+			foreach($user->other['gtalk'] as $item)
+				$tmp_gtalk .= sprintf($template_service, "<a href=\"gtalk:$item\">$item</a>");
+			$services .= sprintf($template_service_wrapper, $service_names['gtalk'], $tmp_gtalk);
+		}
 		
 		#IRC
-		if(count($user->other['irc']) > 0) foreach($user->other['irc'] as $net) $tmp_irc .= sprintf($template_service, "<a href=\"irc://{$net['network']}\">{$net['network']} as {$net['handle']}</a>");
-		$service[] = sprintf($template_service_wrapper, $service_names['irc'], $tmp_irc);
-		
-		# Consoliate with above actions
-		foreach($service as $_service) $services .= $_service;
+		if(count($user->other['irc']) > 0) {
+			foreach($user->other['irc'] as $net)
+				$tmp_irc .= sprintf($template_service, "<a href=\"irc://{$net['network']}\">{$net['network']} as {$net['handle']}</a>");
+			$services .= sprintf($template_service_wrapper, $service_names['irc'], $tmp_irc);
+		}
 		
 		# Write the main page
 		add(sprintf(
@@ -89,15 +104,24 @@ EOD;
 			format_date($user->login, Conf::read('Date Format')) #13
 		));
 		
+		# Disclaimer
+		notification(UINotice, "Um, none of the sidebars work ATM. But you probably already figured that out.");
+		
 		# More Sidebar
-		$links[] = array('link' => Registry::fetch('Interface')->parse_link("ex://Users/Message?new&id=$user->id"), 'name' => 'Message User');
-		$links[] = array('link' => Registry::fetch('Interface')->parse_link("ex://Users/Friendship&id=$user->id"), 'name' => 'Modify Friendship');
-		$links[] = array('link' => Registry::fetch('Interface')->parse_link("ex://Users/Block&id=$user->id"), 'name' => 'Block User');
-		Registry::fetch('Interface')->sidebar('menu', 'content', Registry::fetch('Interface')->menu($links, true));
+		$links[] = array('link' => 'javascript:;', 'name' => 'Message User');
+		$links[] = array('link' => 'javascript:;', 'name' => 'Modify Friendship');
+		$links[] = array('link' => 'javascript:;', 'name' => 'Block User');
+		sidebar('menu', 'content', menu($links, true));
 		
 		# Friends Sidebar
-		Registry::fetch('Interface')->sidebar('menu', 'title', "$user->display_name's Friends", 'content', Registry::fetch('Interface')->menu(array(array('link' => 'javascript:;', 'name' => "$user->display_name has no friends")), true));
+		sidebar('menu', 'title', "$user->display_name's Friends", 'content', menu(array(array('link' => 'javascript:;', 'name' => "Friends not supported")), true));
 		
+		$find[] = array('link' => 'javascript:;', 'name' => 'Posts');
+		$find[] = array('link' => 'javascript:;', 'name' => 'Pages');
+		$find[] = array('link' => 'javascript:;', 'name' => 'Comments');
+		$find[] = array('link' => 'javascript:;', 'name' => 'Images');
+		$find[] = array('link' => 'javascript:;', 'name' => 'Projects');
+		sidebar('menu', 'title', 'Find all...', 'content', menu($find, true));
 	}
 	
 }
@@ -122,7 +146,7 @@ class User {
 	public $conf=array();
 	public $other=array();
 	
-	public function __construct($user_id) { 
+	public function __construct($user_id, $light=false) { 
 		$result = MySQL::query('SELECT * FROM `[prefix]users` WHERE `id` = %u', $user_id);
 		if(mysql_num_rows($result) > 0) {
 			$user = mysql_fetch_assoc($result);
@@ -139,23 +163,25 @@ class User {
 			# Profile Link
 			$link = "ex://Users/Profile?id=$this->id";
 			$this->profile_link = Registry::fetch('Interface')->parse_link($link);
-			# Other Info
-			$this->other = array(
-				'web' => unserialize($user['web']),
-				'aim' => explode(',', $user['aim']),
-				'skype' => explode(',', $user['skype']),
-				'msn' => explode(',', $user['msn']),
-				'gtalk' => explode(',', $user['gtalk']),
-				'irc' => unserialize($user['irc']),
-				'signature' => $user['sig'],
-				'bio' => $user['bio'],
-				'quote' => $user['quote']
-			);
-			$this->private_profile = $user['private'];
-			$this->avatar_full = Registry::fetch('Interface')->parse_link("ex://Media/Avatar/{$user['favatar']}");
-			$this->avatar_small = Registry::fetch('Interface')->parse_link("ex://Media/Avatar/{$user['savatar']}");
-			$this->registered = $user['registered'];
-			$this->login = $user['login'];
+			if($light) {
+				# Other Info
+				if(!is_null($user['web'])) $this->other['web'] = unserialize($user['web']);
+				if(!is_null($user['aim'])) $this->other['aim'] = explode(',', $user['aim']);
+				if(!is_null($user['skype'])) $this->other['skype'] = explode(',', $user['skype']);
+				if(!is_null($user['msn'])) $this->other['msn'] = explode(',', $user['msn']);
+				if(!is_null($user['gtalk'])) $this->other['gtalk'] = explode(',', $user['gtalk']);
+				if(!is_null($user['irc'])) $this->other['irc'] = unserialize($user['irc']);
+				if(!is_null($user['signature'])) $this->other['signature'] = $user['signature'];
+				if(!is_null($user['bio'])) $this->other['bio'] = $user['bio'];
+				if(!is_null($user['quote'])) $this->other['quote'] = $user['quote'];
+				$this->private_profile = $user['private'];
+				if(is_null($user['favatar'])) $this->avatar_full = Registry::fetch('Interface')->avatar['full'];
+				else $this->avatar_full = Registry::fetch('Interface')->parse_link("ex://Media/Avatar/{$user['favatar']}");
+				if(is_null($user['savatar'])) $this->avatar_small = Registry::fetch('Interface')->avatar['small'];
+				else $this->avatar_small = Registry::fetch('Interface')->parse_link("ex://Media/Avatar/{$user['savatar']}");
+				$this->registered = $user['registered'];
+				$this->login = $user['login'];
+			}
 		} else {
 			Log::write("User::__construct($user_id) User does not exist.");
 		}

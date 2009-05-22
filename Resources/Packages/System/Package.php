@@ -5,6 +5,7 @@ function import($id) {
 	$file = sprintf('%s/Resources/%s.php', dirname(__FILE__), $use_id);
 	if(file_exists($file)) {
 		include $file;
+		$resource = str_replace('[%"%]', '\'', $resource);
 		if($resource_type == 'array') return unserialize($resource);
 		else return $resource;
 	} else {
@@ -21,7 +22,8 @@ function register_resource($id, $contents) {
 	} else { # string
 		$resource_type = 'string';
 		$resource = $contents;
-	} $write = sprintf($template, uncrunch($use_id), $resource_type, $resource);
+	} $resource = str_replace('\'', '[%"%]', $resource);
+	$write = sprintf($template, uncrunch($use_id), $resource_type, $resource);
 	FSWrite(sprintf('%s/Resources/%s.php', dirname(__FILE__), $use_id), $write);
 	unset ($template, $resource_type, $resource, $use_id);
 }

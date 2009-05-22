@@ -28,6 +28,7 @@ a {
 	font-family: monospace;
 	text-decoration: none;
 	padding: 1px 3px;
+	font-size: 10px;
 }
 
 a:hover { 
@@ -35,7 +36,8 @@ a:hover {
 	background: $green_dull;
 }
 
-h1 { 
+h1,
+h1 a { 
 	font-size: 20px;
 }
 
@@ -64,7 +66,7 @@ code {
 	margin: 10px;
 	border: 1px solid #333;
 	border-left: 5px solid #333;
-	background: #222 URL('../Images/code-background.png') top right no-repeat;
+	background: #222;
 	padding: 5px;
 }
 
@@ -93,21 +95,45 @@ pre.log * {
 	font-size: 9px;
 }
 
-input {
+input,
+textarea,
+select {
 	margin: 5px;
 	border: 1px solid #333;
 	background: #222;
 	padding: 5px;
+	font-size: 13px;
+	border-left-width: 5px;
 }
 
-input:hover {
+input[disabled],
+textarea[disabled],
+select[disabled]{
+	color: #555;
+}
+
+input:hover,
+textarea:hover,
+select:hover {
 	background: #333;
-	border: 1px solid #444;
+	border-color: #444;
 }
 
-input:focus {
-	border: 1px solid #444;
+input:focus,
+textarea:focus,
+select:focus {
+	border-color: #444;
 	outline: #555 solid 1px;
+}
+
+input[type=submit],
+input[type=button],
+input[type=reset] {
+	border-right-width: 5px;
+}
+
+a img {
+	border: none;
 }
 
 																							/* Header */
@@ -180,7 +206,7 @@ a.noshow:hover {
 	color: $blue_vivid;
 }
 
-.nav a.current { 
+.nav a.current {
 	border-bottom: 15px solid $blue_dull;
 	color: $blue_vivid;
 }
@@ -212,6 +238,7 @@ ul#twitter_update_list {
 
 ul.niceMenu a, 
 ul.UIMenu a,
+ul.UIMenu a.current,
 ul.niceMenu h2,
 ul.UIMenu h2,
 ul#twitter_update_list li { 
@@ -221,6 +248,7 @@ ul#twitter_update_list li {
 
 ul.niceMenu a,
 ul.UIMenu a,
+ul.UIMenu a.current,
 ul#twitter_update_list li {
 	display: block;
 	background-color: #000;
@@ -233,6 +261,7 @@ ul#twitter_update_list li {
 
 ul.niceMenu a:hover,
 ul.UIMenu a:hover,
+ul.UIMenu a.current,
 ul#twitter_update_list li:hover {
 	border-left: 1px solid $blue_vivid;
 	background: $blue_dull;
@@ -243,6 +272,7 @@ ul#twitter_update_list li:hover {
 
 ul.niceMenu a:hover,
 ul.UIMenu a:hover,
+ul.UIMenu a.current,
 ul#twitter_update_list li:hover { 
 	margin-left: -1;
 }
@@ -276,16 +306,18 @@ span.blue ul#twitter_update_list li:hover {
 } 
 
 ul.blue a:hover,
+ul.UIMenu a.current,
 ui.UIMenu a:hover,
 ul.blue h2,
-uiUIMenu h2,
+ui.UIMenu h2,
 span.blue ul#twitter_update_list li:hover { 
 	background: $blue_dull;
 	border-left: 1px solid $blue_vivid;
 }
 
 ul.blue a,
-ul.blue a:hover {
+ul.blue a:hover,
+ul.UIMenu a.current {
 	background-image: url('../Images/Arrows/blue-small.png');
 	background-position: center right;
 	background-repeat: no-repeat;
@@ -358,7 +390,7 @@ blockquote {
 	margin: 10px;
 	border: 1px solid #333;
 	border-left: 5px solid #333;
-	background: #222 URL('../Images/quote-background.png') top right no-repeat;
+	background: #222;
 	padding: 5px; 
 }
 
@@ -432,6 +464,60 @@ a.readmore {
 	font-size: 10px;
 	margin-top: -15px;
 }
+
+div.services {
+	padding-left: 1%;
+}
+
+div.service {
+	background: #222;
+	border: 1px solid #333;
+	width: 45%;
+	margin: 1%;
+	padding: 1%;
+	height: 150px;
+	float:left;
+}
+
+.lCol table.list_item {
+	width: 100%;
+	background: #191919;
+	border: 1px solid #222;
+	margin: 5px;
+}
+
+.lCol table.list_item td {
+	border: 1px solid #333;
+	font-size: 12px;
+	padding: 5px;
+	color: #bbb;
+}
+
+.lCol table.list_item td.meta {
+	text-align: right;
+	width: 100px;
+}
+
+.lCol table.list_item td.name {
+	text-align: right;
+}
+
+.lCol table.list_item td.input {
+	width: 80%;
+}
+
+.lCol table.list_item td.input input[type=text],
+.lCol table.list_item td.input input[type=password],
+.lCol table.list_item td.input textarea,
+.lCol table.list_item td.input select {
+	width: 98%
+}
+
+.lCol table.list_item td h3 {
+	font-size: 20px;
+	margin: 5px;
+}
+
 																							/* Right Col */
 .rCol {
 	padding: 0 5px;
@@ -445,6 +531,10 @@ a.readmore {
 
 .rCol .UISidebar {
 	margin-bottom: 10px;
+}
+
+.rCol .noHead {
+	margin-top: 5px;
 }
 
 .rCol .UISidebar .title { 
@@ -520,12 +610,23 @@ a.readmore {
 	margin: 5px;
 }
 
-.footer-special p { 
+li.footer-special p { 
 	margin: 0;
 	padding: 0;
 	color: #333;
 	line-height: 1.5em;
 	padding: 5px;
+}
+
+li.footer-special a {
+	display: inline;
+	padding: 2px;
+	background-image: none;
+}
+
+li.footer-special a:hover {
+	margin: 0px;
+	border: none;
 }
 
 li.footer-special:hover p { 

@@ -1,6 +1,7 @@
 <?php # Developer Signature Loader
 
-function fetch_sig($id) {
+function fetch_sig($id=null) {
+	if(is_null($id)) return null;
 	$id = crunch($id);
 	$file = sprintf('%s/Resources/%s.php', dirname(__FILE__), $id);
 	if(file_exists($file)) {

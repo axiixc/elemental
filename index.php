@@ -6,6 +6,7 @@ $mtime = explode(" ",$mtime);
 $mtime = $mtime[1] + $mtime[0]; 
 $starttime = $mtime;
 
+/* The Framework */
 $index = dirname(__FILE__).'/';
 include 'Resources/System.php';
 
@@ -14,6 +15,6 @@ $mtime = microtime();
 $mtime = explode(" ",$mtime); 
 $mtime = $mtime[1] + $mtime[0]; 
 $endtime = $mtime; 
-echo "<!-- ". ($endtime - $starttime) . " -->"; 
+echo "<!-- ". ($endtime - $starttime) . " -->";
 
 ?>

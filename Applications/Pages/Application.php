@@ -30,13 +30,17 @@ if($_GET['arg'] == 'list' or !isset($_GET['arg']) or is_null($_GET['arg']) or $_
 				$author->display_name #9
 			)
 		);
-	}	
+	}
+	
+	/* TODO Navigation Controller */
+	/* Build into UserInterface class somehow? Standalone function? */
+	
 } else {
 	$page = Registry::fetch('Application')->read($_GET['arg']);
 	
 	$template = (!is_null(Registry::fetch('Interface')->template('Page Item'))) ? 
 		Registry::fetch('Interface')->template('Page Item') : 
-		'<div><h1>%2$s <div style="font-size:small;">Posted by <a href="%8$s">%9$s</a> on %5$s</div></h1><div>%3$s</div></div>';
+		'<div><h1>%2$s <div style="font-size:small;">Posted by <a href="%8$s">%9$s</a> on %5$s<div style="float:right">%10$s</div></div></h1><div>%3$s</div></div>';
 
 	$author = new User($page['author']);
 	$date_format = Conf::read('Date Format');
@@ -44,7 +48,7 @@ if($_GET['arg'] == 'list' or !isset($_GET['arg']) or is_null($_GET['arg']) or $_
 	add(
 		sprintf(
 			$template, 
-			$id, #1
+			$page['id'], #1
 			$page['name'], #2
 			$page['content'], #3
 			format_date($page['modified'], $date_format), #4
@@ -52,7 +56,8 @@ if($_GET['arg'] == 'list' or !isset($_GET['arg']) or is_null($_GET['arg']) or $_
 			$page['author'], #6
 			$author->id, #7
 			$author->profile_link, #8
-			$author->display_name #9
+			$author->display_name, #9
+			(Registry::read('Edit Links')) ? '<a href="'.parse_link("ex://Preferences/Pages?edit&id=".$page['id']).'">Edit</a>' : null#10
 		)
 	);
 }

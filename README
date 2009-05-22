@@ -6,33 +6,17 @@
  Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W  Re Os Ir Pt Au Hg Ti Pb Bi Po At Rd
  Fr Ra Ac Th Pa U  Np Pu Am Cm Bk Cf Es Fm Md No Lr Uq Up Uh Us Uo Ue Un Ax Ck Da Du Mr Tt
 
- Written in PHP, Elemental is a mix between Objects and old school PHP functions. Elemental is
- my take on a web development framework. It provides things that I find to be useful and helpful
- but I really can't tell you if you are going to like it. It started out of my annoyance with
- recreating bits of code for each project, so I decided to try to create a framework that would
- allow me to forget about certain aspects and focus on my goals in a project.
+ Written in PHP, Elemental is a mix of Objective and Old School PHP. It is mainly my take on a
+ web framework. I made it to provide things I find useful, but I'm not making an promises on how
+ you will take it. It started out of an annoyance with recreating bits of code for all my 
+ projects, so I decided to create something reusable.
 
- Elemental is that, it offers a fully managed UI and Application bundle management system,
- super simple configuration and cache implementations and full UI template support. It relies 
- heavily on dynamic scanning of files and arrays and somewhat on a strict naming convention,
- but nearly everything can be tweaked to fit better with your style of code. A lot of work went
- into the UI Bundle specs, which I am particularly proud of yet no where near done. I really see
- the UI Management as one of the best features of Elemental, allowing you to do all your data
- generation and pass it to a function, knowing that it will display correctly in any UI bundle.
-
- As a side note: I've taken to calling the UI Bundles instead of Themes or Skins because they
- are much more than either of those two things. They contain multiple interfaces, stylesheets,
- images and template files (.t).
-
- Application bundles also feature a set structure of Initialize.php which is loaded before any
- execution code and can be used to preload resources or run user rights checking, display error
- messages and halt further loading before any Application code is run. Resources.php should
- contain a class named the same as your Application's folder, and is the quickest way for other
- bundles or applications to access an App's data. Finally Application.php contains any execution
- code. It is good to note if you have a Resources.php, it has already been included above your
- Application.php. However any bundle containing at least Application.php will run fine. Info.php
- is just a series of arrays read to generate extra display information in the back-end
- management applications.
+ Elemental offers a UI Management and User Authentication checks for loading applications and
+ code execution, lots of great functions for manipulating data and to make data access easier.
+ But I have to say that the UI Management is really one of its best features. I really hated
+ all the current methods that CMSes provide for theming. They were always incomplete and hard
+ to work with. So I tried to simplify it as much as possible, and then tacked on more complex
+ features along the way.
 
  Basically all code is subject to change. I'm still working out the best way to do stuff. I
  wanted to try to make it innovative, yet not a pain or overly complex. As such, I may pull a
@@ -58,25 +42,20 @@
          - Templating and UI Management is done
          - Code is cleaned up and better documented
 
+ H  0005 - Tested and cleaned up all major functions
+         - Made some drastic changes to the User Interface class
+         - Fixed a bug in System.php that caused load to fail
+         - Started work on sample Application Bundles
+         - Added base Packages for Google Analytics, TinyMCE and WZTooltip
+
  ==== Roadmap ============== [-] Assured Change ===== [+] Proposed Change ======================
 
- H  0005 - Fully document code
-    4/12 - Fully test all functions
-         - Fix .htaccess to not require folder to be called Elemental
+ H  0006 + A new System UI to replace AXIIXC UI
+         + Documentation on the User Interface class
+         + Documentation on code conventions and good style
+         + Look into best application writing practices
 
- H  0006 - Base Application Bundles finished and tested
-    4/20 + Write sample Application Bundles
-
- H  0007 + Add extra UI bundles
-    5/01 - Reduce Reduce Reduce memory usage
-         - Reduce code size if possilbe
-
- H  0008 + Look into including JavaScript stuffs by default [mootools]
-    5/** - Start work on 'Direct Query' mode
-         + Add RSS and Search
-
- H  0009 + Add API using (json or the likes)
-    5/** - Write documentation
+ H  0007 + Add MooTools/Some JS or AJAX interactions
  
  He 0010 - Public Release [date unknown]
 
@@ -87,24 +66,14 @@
 
  ==== License ============== Subject to Change =================================================
 
- PHP web application development framework
- Copyright (C) 2009 James Savage axiixc[gmail]com
-                    Anyone Else Who wants[to]help
+ Since I haven't really put much work into looking at liscense I don't really have one to put
+ here. So I'll just make up some general rules (I mean, come on. Its not even done yet, is there
+ even anything worth using yet!?).
 
- This program is free software: you can redistribute it and/or modify it under the terms of the 
- GNU General Public License as published by the Free Software Foundation, either version 3 of 
- the License, or (at your option) any later version.
-
- This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; 
- without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  
- See the GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License along with this program.
- If not, see <http://www.gnu.org/licenses/>.
-
- This license applies to all files that came with this program. Names of specific authors of 
- individual scripts can be found at the top of each scrip next to the script's name in square 
- brackets ( ex [axiixc:mrmonday:danopia] )
+ - Credit me somewhere
+ - If you use full files leave the header in tact (<?php # Something [axiixc])
+ - Realize that this is a work in progress, and don't expect me to answer all your questions
+   ^ Not really a "terms of service" thing but hey, i need to put it somewhere
 
  ==== Contributors =============================================================================
 
