@@ -1,0 +1,64 @@
+ H                                                                                            He
+ Li Be              ELEMENTAL FRAMEWORK                                        B  C  N  O  F  Ne
+ Na Mg           version 0.4   build H 0006                                    Al Si P  S  Cl Ar
+ K  Ca                                           Sc Ti V  Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr
+ Rb Sr                                           Y  Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I  Xe
+ Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W  Re Os Ir Pt Au Hg Ti Pb Bi Po At Rd
+ Fr Ra Ac Th Pa U  Np Pu Am Cm Bk Cf Es Fm Md No Lr Uq Up Uh Us Uo Ue Un Ax Ck Da Du Mr Tt
+
+ COPY GOES HERE
+ 
+ ==== Changelog ================================================================================
+
+ H  0000 - Initial version
+
+ H  0001 - Working version
+
+ H  0002 - Changed file structure
+         - Added User Authentication
+
+ H  0003 - Moved to OOP
+         - Cleaned up libraries and system loader
+
+ H  0004 - Functional build
+         - All major functionality is working and tested
+         - Templating and UI Management is done
+         - Code is cleaned up and better documented
+
+ H  0005 - Tested and cleaned up all major functions
+         - Made some drastic changes to the User Interface class
+         - Fixed a bug in System.php that caused load to fail
+         - Started work on sample Application Bundles
+         - Added base Packages for Google Analytics, TinyMCE and WZTooltip
+
+ H  0006 - Started total rewrite
+         - Finished System.php and most libraries
+         - Started localization process
+         - Made better use of log class for debuging
+
+ ==== Roadmap ============== [-] Assured Change ===== [+] Proposed Change ======================
+
+ H  0007 - Have base finished
+         - Implement full ex:// link support and parsing
+ 
+ He 0000 - Public Release [date unknown]
+
+ ==== Bugs and Patches =========================================================================
+
+ Submit any bugs or patches you create to GitHub if possible for the project Elemental
+ [http://github.com/axiixc/elemental/tree/master] or to axiixc[gmail]com
+
+ ==== License ============== Subject to Change =================================================
+
+ Since I haven't really put much work into looking at liscense I don't really have one to put
+ here. So I'll just make up some general rules (I mean, come on. Its not even done yet, is there
+ even anything worth using yet!?).
+
+ - Credit me somewhere
+ - If you use full files leave the header in tact (<?php # Something [axiixc])
+ - Realize that this is a work in progress, and don't expect me to answer all your questions
+   ^ Not really a "terms of service" thing but hey, i need to put it somewhere
+
+ ==== Contributors =============================================================================
+
+ axiixc : danopia : chuck : mrmonday : ttech
