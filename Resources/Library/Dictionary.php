@@ -1,63 +1,82 @@
-<?php # Dictionary [ axiixc ] : System definitions
+<?php # Constants Dictionary [axiixc]
 
-# System Version
-define('EXSystemVersion', 0.4);
-define('EXSystemBuild', 0004);
+/* Elemental */
+define('__exl_version_numeric', 0.4);
+define('__ex_version_textual', 'Hydrogen');
+define('__ex_version_build', 'H,0009');
+define('__ex_copyright_year', 2008);
+define('__ex_php_version', '5.2.8');
+define('__ex_php_tested', '5.2.8');
 
-# System Definitions
-define('UIError', 'UIError');
-define('UINotice', 'UINotice');
-define('UINotification', 'UINotification');
-define('UISidebarMain', 'UISidebarMain'); # Is this even used?
-define('UISidebarOther','UISidebarOther'); # '''
-define('override', 'override');
-define('nil', root.'Resources/nil'); # Not null, this points to a file
+/* Data Types */
+define('bool', 'EXDataTypeBoolean', true);
+define('string', 'EXDataTypeString', true);
+define('integer', 'EXDataTypeNumberInteger', true);
+define('float', 'EXDataTypeNumberFloat', true);
+define('array', 'EXDataTypeArray', true);
+define('id', 'EXDataTypeID', true);
+define('void', 'EXDataTypeVoid', true);
+define('object', 'EXDataTypeObject', true);
+define('dictionary', 'EXDataTypeDictionary');
+define('rgb', 'EXDataTypeColorRGB', true);
+define('hex', 'EXDataTypeColorHEX', true);
 
-# Filesystem
-define('lc_filename', 'lc_filename'); # Lower Case Filename
-define('lc_basename', 'lc_basename'); # Lower Case Basename
-define('uc_filename', 'uc_filename'); # Upper Case Filename
-define('uc_basename', 'uc_basename'); # Upper Case Filename
-define('filename',    'filename');
-define('basename',    'basename');
-define('position',    'position');
-define('path',        'path');
-define('full_path',   'full_path');
+/* Filesystem */
+define('crunch', 'crunch');
+define('lc_filename', 'lc_filename');
+define('lc_basename', 'lc_basename');
+define('uc_filename', 'uc_filename');
+define('uc_basename', 'uc_basename');
+define('filename', 'filename');   
+define('basename', 'basename');   
+define('position', 'position');
+define('path', 'path');
+define('full_path', 'full_path');
 
-# Date
-define('EXDateSDF_Day', 'Ymd'); # DEPRICATED
-define('EXDateSDF_Hour', 'YmdH'); # DEPRICATED
-define('EXDateSDF_Minute', 'YmdHi'); # DEPRICATED
-define('DateSDF_YMD', EXDateSDF_Day); # DEPRICATED
-define('DateSDF_YMDH', EXDateSDF_Hour); # DEPRICATED
-define('DateSDF_YMDHM', EXDateSDF_Minute); # DEPRICATED
+/* Date */
 define('SDFDay', 'Ymd');
 define('SDFHour', 'YmdH');
 define('SDFMinute', 'YmdHi');
 
-# Time Shortcuts
-define('second',  time()+1);
-define('minute',  time()+60);
-define('hour',    time()+3600);
-define('day',     time()+86400);
-define('week',    time()+604800);
-define('month',   time()+2592000);  # Est to 30 days per month
-define('year',    time()+31536000); # Est to 369 days per year (no leap year)
-define('destroy', time()-day);
+/* Predefined Time */
+define('second', time()+1, true);
+define('minute', time()+60, true);
+define('hour', time()+3600, true);
+define('day', time()+86400, true);
+define('week', time()+604800, true);
+define('month', time()+2592000, true);
+define('year', time()+31536000, true);
+define('destroy', time()-day, true);
 
-# Client Information
-define('client_ip', $_SERVER['REMOTE_ADDR']);
-if($_SERVER['SERVER_ADDR'] = '::1') define('server_ip', '127.0.0.1');
-else define('server_ip', $_SERVER['SERVER_ADDR']);
+/* System */
+define('override', 'EXOverrideState', true);
+define('failure', 'EXFailureState', true);
+define('persistent', 'EXPersistentState', true);
+define('append', 'EXAppendState', true);
+define('nil', root.'Resources/nil', true);
 
-# User Authentication
-define('UATypeBanned', 'UATypeBanned');
-define('UATypeGuest', 'UATypeGuest');
-define('UATypeBasic', 'UATypeBasic');
-define('UATypeAdmin', 'UATypeAdmin');
+/* User Interface */
+define('notification', 'UINotification', true);
+define('error', 'UINotificationError', true);
+define('notice', 'UINotificationNotice', true);
+define('head', 'UIDataInHead', true);
+define('onload', 'UIDataInOnload', true);
+define('body', 'UIDataInBodyAtTop', true);
+define('body_top', body, true);
+define('body_bottom', 'UIDataInBodyAtBottom', true);
 
-# System Resources
+/* User Authentication */
+define('UAAdmin', 'UATypeAdmin', true);
+define('UABasic', 'UATypeBasic', true);
+define('UAGuest', 'UATypeGuest', true);
+define('UABanned', 'UATypeBanned', true);
+
+/* IP Address Information */
+define('client_ip', ($_SERVER['REMOTE_ADDR'] == '::1') ? '127.0.0.1' : $_SERVER['REMOTE_ADDR'], true);
+define('server_ip', ($_SERVER['SERVER_ADDR'] == '::1') ? '127.0.0.1' : $_SERVER['SERVER_ADDR'], true);
+
+/* System Resources */
 $system['applications'] = array('api', 'preferences', 'system', 'user');
-$system['package'] = array('developers', 'system');
+$system['package'] = array('developer_signatures', 'system_resources');
 $system['ui'] = array('system');
 $system['preferences'] = array('api', 'system', 'user', 'site');

@@ -1,19 +1,20 @@
 <?php # Filesystem Library [ axiixc ] : Basic Actions
 
 # Directory Specific Functions
-function FSDirRead($path, $full=true, $keyformat=null, $post='/') {
+function dir_read($path, $full=true, $keyformat=null, $post='/') {
 	if(file_exists($path)) {
 		$temp = scandir($path);
 		foreach($temp as $file) {
 			if(!in_array(strtolower($file), array('.', '..', '.ds_store'))) {
 				# Can be condensed?
-				if($keyformat == lower_case_filename) $key = strtolower(filename($file));
-				elseif($keyformat == lower_case_basename) $key = strtolower($file);
-				elseif($keyformat == upper_case_filename) $key = strtolower(filename($file));
-				elseif($keyformat == upper_case_basename) $key = strtoupper($file);
+				if($keyformat == crunch) $key = crunch(filename($file), true);
+				if($keyformat == lc_filename) $key = strtolower(filename($file));
+				elseif($keyformat == lc_basename) $key = strtolower($file);
+				elseif($keyformat == uc_filename) $key = strtolower(filename($file));
+				elseif($keyformat == uc_basename) $key = strtoupper($file);
 				elseif($keyformat == filename) $key = filename($file);
 				elseif($keyformat == basename) $key = $file;
-				elseif($keyformat == position_in_array) $key = count($output) - 1;
+				elseif($keyformat == position) $key = count($output) - 1;
 				elseif($keyformat == path) $key = $path;
 				elseif($keyformat == full_path) $key = $path . $file;
 				if(!$full) $output[$key] = $file . $post;
@@ -23,7 +24,7 @@ function FSDirRead($path, $full=true, $keyformat=null, $post='/') {
 	}
 }
 
-function FSDirMake($path) { 
+function dir_make($path) { 
 	if(!file_exists($path)) { 
 		mkdir($path); 
 		return true; 
@@ -31,7 +32,7 @@ function FSDirMake($path) {
 }
 
 # General Filesystem Functions
-function FSRename($path,$rename) {
+function file_rename($path,$rename) {
 	$name = dirname($path) . '/' . $rename;
 	if(!copy($path,$name)) return FALSE;
 	else {
@@ -55,10 +56,10 @@ function FSRename($path,$rename) {
 	}
 }
 
-function FSMove($path, $to) { return FSRename($path, $to); }
-function FSCopy($path,$to) { return copy($path, $to); }
+function file_move($path, $to) { return FSRename($path, $to); }
+function file_copy($path,$to) { return copy($path, $to); }
 
-function FSDelete($path) {
+function file_delete($path) {
 	$original_path = $path;
 	$handler = opendir($path);
 	while (true) {
@@ -79,12 +80,12 @@ function FSDelete($path) {
 }
 
 # FSPermissions, FSOwner, FSGroup Unsupported
-function FSPermissions($path, $permissions, $recursive) { return false; }
-function FSOwner($path, $owner, $recursive) { return false; }
-function FSGroup($path, $group, $recursive) { return false; }
+function file_permissions($path, $permissions, $recursive) { return false; }
+function file_owner($path, $owner, $recursive) { return false; }
+function file_group($path, $group, $recursive) { return false; }
 
 # File Specific Functions
-function FSRead($path, $username=false, $password=false) {
+function file_read($path, $username=false, $password=false) {
 	if($username and $password) { # Remote (Auth)
 		$auth = "$username@$password:";
 		if(substr(ltrim($path), 8, -8) == 'https://') {
@@ -102,7 +103,7 @@ function FSRead($path, $username=false, $password=false) {
 	return file_get_contents($use_path);
 }
 
-function FSEdit($path, $contents, $mode) {
+function file_edit($path, $contents, $mode) {
 	$handle = fopen($path, $mode);
 	if(fwrite($handle, $contents)) return true;
 	else return false;
@@ -110,6 +111,6 @@ function FSEdit($path, $contents, $mode) {
 }
 
 # Shortcuts, use if you wish
-function FSWrite($path, $contents) { return FSEdit($path, $contents, w); }
-function FSAppend($path, $contents) { return FSEdit($path, $contents, a); }
-function FSMake($path) { return FSEdit($path, nil, w); }
+function file_write($path, $contents) { return FSEdit($path, $contents, w); }
+function file_append($path, $contents) { return FSEdit($path, $contents, a); }
+function file_make($path) { return FSEdit($path, nil, w); }

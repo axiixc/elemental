@@ -2,12 +2,14 @@
 
 class MySQL {
 	
-	private static $base, $prefix, $conf_file, $queries=array();
+	public static $base;
+	public static $prefix;
+	private static $conf_file;
+	private static $queries = array();
 	
-	private function __construct() {
-	}
+	private function __construct() {}
 	
-	public static function connect() {
+	public static function awake() {
 		if(file_exists(root.'Resources/mysql_conf.php')) {
 			self::$conf_file = root.'Resources/mysql_conf.php';
 			include self::$conf_file;
@@ -16,7 +18,7 @@ class MySQL {
 			if(!mysql_connect($mysql_host,$mysql_user,$mysql_pass)) echo mysql_error();
 			if(!mysql_select_db($mysql_base)) echo mysql_error();
 		} else {
-			Log::write("MySQL::connect() Configuration could not be found. Run MySQL::write_conf().");
+			Log::write("MySQL Connect Failed: Configuration could not be found. Run MySQL::write_conf().");
 		}
 	}
 	
@@ -39,18 +41,26 @@ class MySQL {
 		return $r;
 	}
 	
-	public static function diagnostics($return=false) {
+	public static function debug() {
 		include self::$conf_file;
 		$output['host'] = $mysql_host;
 		$output['user'] = $mysql_user;
-		$output['password'] = '********'; # = $mysql_pass; # If you really mean it
+		$output['password'] = '********'; # or $mysql_pass If you really mean it
 		$output['database'] = $mysql_base;
 		$output['prefix'] = $mysql_prefix;
 		$output['queries'] = "\n";
 		foreach(self::$queries as $query) $output['queries'] .= "$query\n";
-		return diagnostic($output, $return);
+		debug::register('mysql', $output);
 	}
 	
 }
 
-MySQL::connect();
+function query() {	
+	$args = func_get_args();
+	$sql = array_shift($args);
+	$sql = str_replace('[prefix]', mysql::$prefix, $sql);
+	$sql = str_replace('[database]', mysql::$base, $sql);
+	if(count($args) > 0) $sql = vsprintf($sql, $args);
+	self::$queries[] = $sql;
+	return mysql_query($sql);
+}

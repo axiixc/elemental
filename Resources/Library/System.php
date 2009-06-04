@@ -1,61 +1,67 @@
 <?php
 
-class System {
+class system {
 	
-	public $app;
-	public $override = false;
+	public static $applications;
+	public static $libraries;
+	public static $packages;
 	
-	public function __construct() {
-		# Application
-		if(isset($_GET['app'])) $this->app = strtolower(path_safe($_GET['app']));
-		else $this->app = strtolower(Conf::read('Application'));
+	public static function awake() {
+		self::$applications = dir_read(root . 'Applications', true, crunch);
+		self::$libraries = dir_read(root . 'Resources/Libraries', true, crunch, -4);
+		self::$packages = dir_read(root . 'Resources/Packages', true, crunch);
 	}
 	
-	public function diagnostics($return=false) {
-		$output['Application'] = $this->app;
-		$output['override'] = $this->override;
-		return diagnostic($output, $return);
+	public static function application() {
+		return (isset($_GET['app'])) ? strtolower($_GET['app']) : strtolower(conf::read('Application')) ;
 	}
 	
-	public function end($reason) {
-		$die = import("Permanant Session Log");
-		$die[time()] = $reason;
-		register_resource("Permanant Session Log", $die);
-		die("Your session was forcefully killed by the watchdog.");
+	public static function debug() {
+		$output['application'] = self::application();
+		$output['override'] = self::$override;
+		debug::register('system', $output);
+	}
+	
+	public function kill($reason=null) {
+		log::write(true, "System Killed: %s", $reason);
+		log::sleep();
+		die('Session was killed');
 	}
 	
 }
 
-function package($id) {
-	$id = crunch($id);
-	if(file_exists(root."Resources/Packages/$id/Package.php")) {
-		return root."Resources/Packages/$id/Package.php";
-	} else if(file_exists(root."Packages/$id")) {
-		Log::write("package($id) Not a valid package.");
+function package($identifier) {
+	crunch($identifier);
+	if(file_exists(system::$packages[$identifier] . 'Package.php')) {
+		return system::$package[$identifier] . 'Package.php';
+	} else if(file_exists(system::$package[$identifier])) {
+		log::write("Package Include [$identifier] Failed: Not a valid package.");
 		return nil;
 	} else {
-		Log::write("package($id) Package does not exist.");
-		return nil;
-	}
-}
-
-function library($id) {
-	$id = crunch($id);
-	if(file_exists(root."Resources/Library/$id.php")) {
-		return root."Resources/Library/$id.php";
-	} else {
-		Log::write("library($id) Library does not exist.");
+		log::write("Package Include [$identifier] Failed: Package not found.");
 		return nil;
 	}
 }
 
-function application($id) {
-	$id = crunch($id);
-	if(file_exists(root."Applications/$id/Resources.php")) {
-		return root."Applications/$id/Resources.php";
+function library($identifier) {
+	crunch($identifier);
+	if(file_exists(system::$libraries[$identifier] . '.php')) {
+		return system::$libraries[$identifier] . '.php';
 	} else {
-		if(file_exists(root."Applications/$id")) Log::write("application($id) Application does not exist.");
-		elseif(file_exists(root."Applications/$id/Resources.php")) Log::write("application($id) Application does not contain a resource file.");
+		log::write("Library Include [$identifier] Failed: Library not found.");
+		return nil;
+	}
+}
+
+function application($identifier) {
+	crunch($identifier);
+	if(file_exists(system::$applications[$identifier] . 'Resources.php')) {
+		return system::$applications[$identifier] . 'Resources.php';
+	} else if(file_exists(system::$applications[$identifier])) {
+		log::write("Application Resource Include [$identifier] Failed: Application bundle not found.");
+		return nil;
+	} else {
+		log::write("Application Resource Include [$identifier] Failed: Application resource file not found.");
 		return nil;
 	}
 }

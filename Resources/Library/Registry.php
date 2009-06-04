@@ -1,62 +1,54 @@
-<?php
+<?php # Registry [axiixc]
 
-class Registry {
+class EX {
 	
-	public static $objects = array();
-	public static $environment = array();
+	private static $objects = array();
+	private static $sys_vars = array();
+	private $System, $Interface, $UAuth;
 	
 	private function __construct() {}
 	
-	public static function register($object_name, $object) {
-		$object_name = crunch($object_name);
+	private function awake() {
+		self::$System = new System();
+		self::$interface = new UserInterface();
+		self::$UAuth = new UserAuthentication();
+	}
+	
+	/* Objects */
+	public static function register($identifier, $object) {
 		if(is_object($object)) {
-			if(isset(self::$objects[$object_name])) Log::write("Registry::register($object_name) Object already registered.");
-			else self::$objects[$object_name] = $object;
+			if(!isset(self::$objects[$identifier])) {
+				self::$objects[$identifer] = $object;
+			} else {
+				log::write("Registry Add Object [$identifier] Failed: Supplied Identifier is already taken.");
+			}
 		} else {
-			Log::write("Registry::register($object_name) Not an object.");
+			log::write("Registry Add Object [$identifier] Failed: Supplied Object is a non-object.");
 		}
 	}
 	
-	public static function fetch($object_name) {
-		$object_name = crunch($object_name);
-		if(isset(self::$objects[$object_name])) return self::$objects[$object_name];
-		else Log::write("Registry::fetch($object_name) Object not registered.");
-	}
-
-	public static function destroy($object_name) {
-		$object_name = crunch($object_name);
-		if(isset(self::$objects[$object_name])) {
-			unset(self::$objects[$object_name]);
+	public static function fetch($identifier) {
+		if(isset(self::$objects[$identifier])) {
+			return self::$objects[$identifier];
 		} else {
-			Log::write("Registry::destroy($object_name) Not an object.");
+			log::write("Registry Read Object [$identifier] Failed: No Object for Identifier.");
 		}
 	}
 	
-	public static function write($name, $value) {
-		$name = crunch($name);
-		self::$environment[$name] = $value;
+	/* System Global Variables */
+	public static function write($key, $value) {
+		self::$sys_vars[$key] = $value;
 	}
 	
-	public static function read($name) {
-		$name = crunch($name);
-		if(isset(self::$environment[$name])) return self::$environment[$name];
-		else Log::write("Registry::read($name) Environment variable does not exist.");
-	}
-	
-	public static function delete($name) {
-		$name = crunch($name);
-		if(isset(self::$environment[$name])) unset(self::$environment[$name]);
-		else Log::write("Registry::delete($name) Environment variable does not exist.");
-	}
-	
-	public static function diagnostics($return=false) {
-		foreach(self::$objects as $name => $foo) {
-			$name = uncrunch($name);
-			$output['Objects'] .= "$name ";
-		} foreach(self::$environment as $name => $value) {
-			$name = uncrunch($name);
-			$output['Environment'] .= "<br />  => <span style=\"color:#7096C2\">$name</span> : $value";
-		} return diagnostic($output, $return);
+	public static function read($key, $show_error=true) {
+		if(isset(self::$sys_vars[$key])) {
+			return self::$sys_vars[$key];
+		} else {
+			if($show_error) log::write("Registry Read System Variable [$key] Failed: No Value for Key.");
+			return failure;
+		}
 	}
 	
 }
+
+?>

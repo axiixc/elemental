@@ -24,13 +24,31 @@ function html_safe($str=null) {
 
 function filename($str) { $nfo = pathinfo($str); return $nfo['filename']; }
 
-function crunch($string) {
-	return str_replace(' ', '-', str_replace('_', '-', strtolower($string)));
+function crunch(&$string, $edit_local=false) {
+	$x = str_replace(' ', '-', str_replace('_', '-', strtolower($string)));
+	
+	if($edit_local) $string = $x;
+	return $x;
 }
 
-function uncrunch($string, $expand_to=' ') {
-	return ucwords(str_replace('-', $expand_to, $string));
+function uncrunch(&$string, $one=' ', $two=' ') {
+	if(is_bool($one)) {
+		$edit_local = $one;
+		$expand_to = $two;
+	} else {
+		$edit_local = true;
+		$expand_to = $one;
+	}
+	
+	$x = ucwords(str_replace('-', $expand_to, $string));
+	
+	if($edit_local) $string = $x;
+	return $x;
 }
+
+function force_type(&$input, $type) {}
+
+function convert($input, $type) {}
 
 function is_even($x) {
 	if($x&1) return false;
@@ -54,20 +72,6 @@ function eoargs($array) {
 	} else {
 		Log::write("eoargs() Bad argument layout. Make sure argument count, including key, is an odd number.");
 	}
-}
-
-function diagnostic($output, $return=false) {
-	foreach($output as $name => $value) {
-		if(is_null($value)) $value = 'NULL';
-		if($value === true) $value = 'TRUE';
-		if($value === false) $value = 'FALSE';
-		$value = str_replace('NULL', Registry::fetch('Interface')->template('Diagnostic NULL'), $value);
-		$value = str_replace('TRUE', Registry::fetch('Interface')->template('Diagnostic TRUE'), $value);
-		$value = str_replace('FALSE', Registry::fetch('Interface')->template('Diagnostic FALSE'), $value);
-		$x .= sprintf(Registry::fetch('Interface')->template('Diagnostic Item'), uncrunch($name), $value);
-	}
-	if($return) return sprintf(Registry::fetch('Interface')->template('Diagnostic'), $x); 
-	else { printf(Registry::fetch('Interface')->template('Diagnostic'),$x); return null; }
 }
 
 function in_string($pointer, $input, $case=false, $word=false) {
@@ -102,8 +106,8 @@ function format_date($is=null, $want=null) {
 }
 
 function whereami() {
-	$app = ($_GET['app'] != null) ? $_GET['app'] : Conf::read("Application") ;
-	$arg = ($_GET['arg'] != null) ? '/'.uncrunch($_GET['arg']) : null ;
+	$app = ($_GET['app'] != null) ? $_GET['app'] : system::application() ;
+	$arg = ($_GET['arg'] != null) ? '/'.uncrunch($_GET['arg'], false) : null ;
 	$gets = $_GET;
 	unset($gets['app']); unset($gets['arg']);
 	$get = null;
@@ -114,8 +118,12 @@ function whereami() {
 	return Conf::read('WWW Path').$app.$arg.$get;
 }
 
-function content_type($input) {
-	$mime_types = EXFetchResources('mime_types');
-	list($dir, $base, $ext, $file) = pathinfo($input);
-	return isset($mime_types[$ext]) ? $mime_types[$ext] : 'application/octet-stream';
+function mime_type($input) {
+	if(file_exists($input)) {
+		$mime_types = EXFetchResources('Mime Types');
+		list($dir, $base, $ext, $file) = pathinfo($input);
+		return isset($mime_types[$ext]) ? $mime_types[$ext] : 'application/octet-stream';
+	} else {
+		log::write("mime_type: No file at $input.");
+	}
 }

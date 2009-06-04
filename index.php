@@ -1,20 +1,22 @@
-<?php
+<?php # Main Index [axiixc]
 
-/* Timer */
-$mtime = microtime(); 
-$mtime = explode(" ",$mtime); 
-$mtime = $mtime[1] + $mtime[0]; 
-$starttime = $mtime;
+/* Starting Time */
+$mtime = explode(' ', microtime());
+print_r($mtime);
+$starttime = $mtime[1] + $mtime[0];
 
 /* The Framework */
 $index = dirname(__FILE__).'/';
 include 'Resources/System.php';
 
-/* Counter */
-$mtime = microtime(); 
-$mtime = explode(" ",$mtime); 
-$mtime = $mtime[1] + $mtime[0]; 
-$endtime = $mtime; 
-echo "<!-- ". ($endtime - $starttime) . " -->";
+/* Ending Time */
+$mtime = explode(' ', microtime());
+$endtime = $mtime[1] + $mtime[0];
+
+/* Calculations */
+$totaltime = ( $endtime - $starttime );
+
+/* Output */
+echo ($__output_create_style == 'console') ? $totaltime : "<!-- $totaltime -->";
 
 ?>
