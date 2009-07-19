@@ -1,0 +1,13 @@
+<html>
+<head>
+<?php
+   System::InterfaceHandler()->head();
+?>
+</head>
+<body>
+<?php
+   System::InterfaceHandler()->content(true);
+   System::InterfaceHandler()->javascript(false);
+?>
+</body>
+</html>
