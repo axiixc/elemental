@@ -1,5 +1,5 @@
 RewriteEngine on
-RewriteRule ^([0-9A-Za-z_]+)$ index.php?app=$1 [PT,L,QSA]
-RewriteRule ^([0-9A-Za-z_]+)/$ /Elemental/$1 [R]
-RewriteRule ^([0-9A-Za-z_]+)/([0-9A-Za-z_]+)$ index.php?app=$1&arg=$2 [PT,L,QSA]
-RewriteRule ^([0-9A-Za-z_]+)/([0-9A-Za-z_]+)/$ /Elemental/$1/$2 [R]
+RewriteRule ^([0-9A-Za-z_-]+)$ index.php?app=$1 [PT,L,QSA]
+RewriteRule ^([0-9A-Za-z_-]+)/$ /Elemental/$1 [R]
+RewriteRule ^([0-9A-Za-z_-]+)/([0-9A-Za-z_-]+)$ index.php?app=$1&arg=$2 [PT,L,QSA]
+RewriteRule ^([0-9A-Za-z_-]+)/([0-9A-Za-z_-]+)/$ /Elemental/$1/$2 [R]

@@ -1,22 +1,19 @@
-<?php # Main Index [axiixc]
+<?php
 
-/* Starting Time */
-$mtime = explode(' ', microtime());
-print_r($mtime);
-$starttime = $mtime[1] + $mtime[0];
+srand(time());
+
+function mTimeGet()
+{
+	$mtime = explode(' ', microtime());
+	return $mtime[1] + $mtime[0];
+}
+
+$starttime = mTimeGet();
 
 /* The Framework */
 $index = dirname(__FILE__).'/';
-include 'Resources/System.php';
+require_once $index . 'Resources/Core.php';
 
-/* Ending Time */
-$mtime = explode(' ', microtime());
-$endtime = $mtime[1] + $mtime[0];
-
-/* Calculations */
-$totaltime = ( $endtime - $starttime );
-
-/* Output */
-echo ($__output_create_style == 'console') ? $totaltime : "<!-- $totaltime -->";
+echo '<!-- ' . (mTimeGet() - $starttime) . ' -->';
 
 ?>

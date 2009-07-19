@@ -1,67 +1,112 @@
-<?php
+<?php # System Class and Main Handler [axiixc]
 
-class system {
+class System
+{
+
+	public static $application, $arg, $environment;
+	private static $_database, $_configuration, $_interface, $_authority, $_user;
 	
-	public static $applications;
-	public static $libraries;
-	public static $packages;
+	private function __construct() {}
 	
-	public static function awake() {
-		self::$applications = dir_read(root . 'Applications', true, crunch);
-		self::$libraries = dir_read(root . 'Resources/Libraries', true, crunch, -4);
-		self::$packages = dir_read(root . 'Resources/Packages', true, crunch);
+	public static function Initialize()
+	{
+		/* Setup Registry */
+		self::$_database = new Database();
+		self::$_configuration = new Configuration();
+		self::$_interface = new InterfaceHandler();
+		self::$_authority = new Authority();
+		self::$_user = new User();
+		
+		/* Set base values and cleanup */
+		crunch($_GET['app']);
+		crunch($_GET['arg']);
+		
+		self::$application = priority_select($_GET['app'], cfRead('Default Application'), 'System');
+		exMethod('System: _application = ' . self::$application);
+		self::$arg = $_GET['arg'];
 	}
 	
-	public static function application() {
-		return (isset($_GET['app'])) ? strtolower($_GET['app']) : strtolower(conf::read('Application')) ;
+	public function Application()
+	{
+	   return self::$application;
+   }
+	
+	/* Accessors */
+	public static function Database()
+	{
+		return self::$_database;
 	}
 	
-	public static function debug() {
-		$output['application'] = self::application();
-		$output['override'] = self::$override;
-		debug::register('system', $output);
+	public static function Configuration()
+	{
+		return self::$_configuration;
 	}
 	
-	public function kill($reason=null) {
-		log::write(true, "System Killed: %s", $reason);
-		log::sleep();
-		die('Session was killed');
+	public static function InterfaceHandler()
+	{
+		return self::$_interface;
+	}
+	
+	public static function Authority()
+	{
+		return self::$_authority;
+	}
+	
+	public static function User()
+	{
+		return self::$_user;
+	}
+	
+	/* Environment */
+	public static function Read($name)
+	{
+		crunch($name);
+		return self::$environment[$name];
+	}
+	
+	public static function Write($name, $value)
+	{
+		crunch($name);
+		self::$environment[$name] = $value;
+	}
+	
+	public static function Delete($name)
+	{
+		crunch($name);
+		unset(self::$environment[$name]);
+	}
+	
+	public static function Set($name)
+	{
+		crunch($name);
+		return (isset(self::$environment[$name]));
+	}
+	
+	public static function Terminate()
+	{
+		
 	}
 	
 }
 
-function package($identifier) {
-	crunch($identifier);
-	if(file_exists(system::$packages[$identifier] . 'Package.php')) {
-		return system::$package[$identifier] . 'Package.php';
-	} else if(file_exists(system::$package[$identifier])) {
-		log::write("Package Include [$identifier] Failed: Not a valid package.");
-		return nil;
-	} else {
-		log::write("Package Include [$identifier] Failed: Package not found.");
-		return nil;
-	}
+/* Plain Function Accessors (normal name convention) */
+
+function sysRead($key)
+{
+	return System::Read($key);
 }
 
-function library($identifier) {
-	crunch($identifier);
-	if(file_exists(system::$libraries[$identifier] . '.php')) {
-		return system::$libraries[$identifier] . '.php';
-	} else {
-		log::write("Library Include [$identifier] Failed: Library not found.");
-		return nil;
-	}
+function sysWrite($key, $value)
+{
+	System::Write($key, $value);
 }
 
-function application($identifier) {
-	crunch($identifier);
-	if(file_exists(system::$applications[$identifier] . 'Resources.php')) {
-		return system::$applications[$identifier] . 'Resources.php';
-	} else if(file_exists(system::$applications[$identifier])) {
-		log::write("Application Resource Include [$identifier] Failed: Application bundle not found.");
-		return nil;
-	} else {
-		log::write("Application Resource Include [$identifier] Failed: Application resource file not found.");
-		return nil;
-	}
+function sysDelete($key)
+{
+	System::Delete($key);
+}
+
+function sysSet($key)
+{
+	return System::Set($key);
 }
