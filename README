@@ -68,6 +68,12 @@
  
  ==== License ============== Subject to Change =================================================
   
- This isn't really a priority but if you use something just leave the header comment if you use
- a full file, and a note about Elemental or a link to the github project is appreciated.
+ I don't expect anything to be too useful in its current state, but if you use anything a link
+ (http://axiixc.com/Projects/Elemental) or mention would be nice. If you use a full file please add the 
+ following comment block to the top of the file.
+ 
+ // 
+ // ELEMENTAL FRAMEWORK H  0007 : <filename/>
+ // Author: James Savage [ axiixc.com/Projects/Elemental ]
+ //
  
