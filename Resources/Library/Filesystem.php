@@ -246,14 +246,22 @@ function fsGetApplications()
 {
 	return fsDirRead(root . 'Applications', true, lc_filename);
 }
+
 function fsGetLibraries()
 {
 	return fsDirRead(root . 'Resources/Library', true, lc_filename);
 }
+
+function fsGetPreferences()
+{
+   return fsDirRead(root . 'Resources/Preferences', true, lc_filename);
+}
+
 function fsGetPackages()
 {
 	return fsDirRead(root . 'Resources/Packages', true, lc_filename);
 }
+
 function fsGetInterface()
 {
 	return fsDirRead(root . 'Resources/Interfaces', true, lc_filename);

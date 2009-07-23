@@ -21,7 +21,6 @@ foreach($required_libraries as $library)
 }
 
 crunch($_GET['app']);
-crunch($_GET['arg']);
 
 System::Initialize();
 
