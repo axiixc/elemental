@@ -9,24 +9,26 @@ class SharedPage
    
    public static function Initialize()
    {
-      self::$statements['fetch_with_id'] = '';
-      self::$statements['fetch_with_data'] = '';
-      self::$statements['update_with_id'] = '';
-      self::$statements['update_with_data'] = '';
-      self::$statements['clone'] = '';
-      self::$statements['create'] = '';
-      self::$statements['update'] = '';
-      self::$statements['is_page'] = '';
-      self::$statements['is_draft'] = '';
+      self::$statements['fetch_with_id'] = "SELECT *  FROM `[prefix]pages` WHERE `id` LIKE CONVERT(_utf8 '%s' USING latin1) COLLATE latin1_swedish_ci";
+      // self::$statements['fetch_with_data'] = "";
+      self::$statements['update_with_id'] = "UPDATE `[database]`.`[prefix]pages` SET `%s` = '%s' WHERE CONVERT(`[prefix]pages`.`id` USING utf8) = '%s' LIMIT 1;";
+      // self::$statements['update_with_data'] = "";
+      self::$statements['create'] = "INSERT INTO `[database]`.`[prefix]pages` (`id`, `name`, `content`, `author`, `date_modified`, `date_created`, `draft`) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s');";
+      self::$statements['delete'] = "DELETE FROM `[prefix]pages` WHERE CONVERT(`[prefix]pages`.`id` USING utf8) = '%s' LIMIT 1";
+      // self::$statements['update'] = "";
+      self::$statements['is_page'] = "SELECT `id` FROM `[prefix]pages` WHERE `id` LIKE CONVERT(_utf8 '%s' USING latin1) COLLATE latin1_swedish_ci";
+      self::$statements['is_draft'] = "SELECT `draft` FROM `[prefix]pages` WHERE `id` LIKE CONVERT(_utf8 '%s' USING latin1) COLLATE latin1_swedish_ci";
    }
    
-   public static function List($offset = 0, $count = 30, $full = false, $drafts = false)
+   public static function Fetch($offset = 0, $count = 30, $full = false, $drafts = false)
    {
       // (full) ? return new Page() objects : return page ids ;
       // (drafts) ? include drafts : do not include drafts ;
    }
    
 }
+
+SharedPage::Initialize();
 
 class Page
 {
@@ -35,26 +37,24 @@ class Page
    public $id, $name, $content, $author = array(), $date_modified, $date_created, $draft;
    
    public function __construct($page_id, $read_only = true)
-   {
-      SharedPage::$statements['fetch_with_id'] = '';
-      
+   {  
       $this->read_only = $read_only;
       
       $_page = query(SharedPage::$statements['fetch_with_id'], $page_id);
       if (is_resource($_page) and mysql_num_rows($_page) > 0)
       {
          $page = mysql_fetch_assoc($_page);
-         $id = $page['id'];
-         $name = $page['name'];
+         $this->id = $page['id'];
+         $this->name = $page['name'];
          
          // TODO add ex: parsing, add special comment parsing, add [[]] parsing
-         $content = $page['content'];
+         $this->content = $page['content'];
          
-         $author = new User($page['user']);
-         $date_modified = $page['date_modified'];
-         $date_created = $page['date_created'];
+         $this->author = new User($page['author']);
+         $this->date_modified = $page['date_modified'];
+         $this->date_created = $page['date_created'];
          
-         $draft = ($page['draft']);
+         $this->draft = ($page['draft']);
       }
       else
       {
@@ -62,7 +62,12 @@ class Page
       }
    }
    
-   /* all the editing is done in here, really! */
+   public function delete()
+   {
+      query(SharedPage::$statements['delete'], $this->id);
+   }
+   
+   /* all the editing is done in here, really! (er... see if you can't clean it up) */
    public function __set($key, $value)
    {
       $valid_update = array(
@@ -76,7 +81,38 @@ class Page
       
       if ($read_only)
       {
-         $this->$key = $value;
+         if ($key != 'id')
+         {
+            if ($key == 'author')
+            {
+               if (is_string($value) and strlen($value) == 32)
+               {
+                  $value = new User($value);
+               }
+               
+               if (is_object($value) and isset($value->id))
+               {
+                  $this->user = $value;
+               }
+               else
+               {
+                  exLog("Pages->__set(): Could not update author. Neither user ID nor user Object given as value.");
+               }
+            }
+            else if ($key == 'draft')
+            {
+               $value = ($value); // Force BOOL
+               $this->draft = ($value);
+            }
+            else
+            {
+               $this->$key = $value;
+            }
+         }
+         else
+         {
+            exLog('Page->__set(): ID is not editable');
+         }
       }
       else
       {
@@ -101,7 +137,7 @@ class Page
             }
             else if ($key == 'draft')
             {
-               $value = ($value) // Force BOOL
+               $value = ($value); // Force BOOL
                query(SharedPage::$statements['update_with_id'], 'draft', '1', $this->id);
                $this->draft = ($value);
             }
@@ -109,6 +145,7 @@ class Page
             {
                array_flip($valid_update);
                query(SharedPage::$statements['update_with_id'], $valid_update[$key], $value, $this->id);
+               $this->$key = $value;
             }
          }
          else
@@ -121,7 +158,7 @@ class Page
    
 }
 
-new BlankPage extends Page
+class BlankPage extends Page
 {
    
    public function __construct()
@@ -159,8 +196,8 @@ new BlankPage extends Page
          $this->author = $args['author'];
       }
    
-      $date_modified = $date_created = date(sdfDay);
-      $draft = priority_select($args['draft'], false);
+      $this->date_modified = $this->date_created = date(sdfDay);
+      $this->draft = priority_select($args['draft'], false);
       
       // Is this needed?
       $draft = ($this->draft) ? '1' : '0';

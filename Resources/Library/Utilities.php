@@ -171,7 +171,7 @@ function wcsubstr($str_String, $int_Length)
 
 function format_date($is=null, $want=null)
 {
-	$want = (is_null($want)) ? Conf::read("Date Format") : $want ;
+	$want = (is_null($want)) ? cfRead("Date Format") : $want ;
 	return (is_null($is)) ? date($want) : date($want, strtotime($is)) ;
 }
 

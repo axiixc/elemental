@@ -25,6 +25,7 @@ class Database
 		$sql = str_replace('[prefix]', $this->prefix, $sql);
 		$sql = str_replace('[database]', $this->database, $sql);
 		$this->queries[] = $sql;
+      exMethod("Database: MySQL Query -> $sql");
 		return mysql_query($sql);
 	}
 	

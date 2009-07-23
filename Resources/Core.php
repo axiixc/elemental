@@ -68,11 +68,13 @@ else
 	error('Application Not Found', 'The requested application bundle was either not found, or invalid.');
 }
 
+add('<hr />'); // REMOVE ME
+
 if (System::InterfaceHandler()->mannagedUI)
 {
 	include System::InterfaceHandler()->interfaceFile();
 }
 
-echo Development::logDump();
+echo Development::logDump(); // REMOVE ME
 
 System::Terminate();
